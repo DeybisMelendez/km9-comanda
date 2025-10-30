@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.pumpkin.min.css"
+    >
+</head>
+<body>
+    <header class="container">
+        <nav>
+        <ul>
+            <li><strong>🍗 Comandas</strong></li>
+        </ul>
+        <ul>
+            <li>
+            <a href="{% url 'table_list' %}" {% if request.path == '/' %}aria-current="page"{% endif %}>
+                Mesas
+            </a>
+            </li>
+            <li>
+            <a href="{% url 'order_history' %}" {% if '/historial' in request.path %}aria-current="page"{% endif %}>
+                Historial
+            </a>
+            </li>
+            <li>
+            <a href="{% url 'daily_report' %}" {% if '/reporte' in request.path %}aria-current="page"{% endif %}>
+                Reporte Diario
+            </a>
+            </li>
+            <li>
+            <a href="{% url 'inventory_list' %}" {% if '/inventario' in request.path %}aria-current="page"{% endif %}>
+                Inventario
+            </a>
+            </li>
+            <li>
+            <a href="{% url 'export_orders_csv' %}" {% if '/exportar' in request.path %}aria-current="page"{% endif %}>
+                Exportar CSV
+            </a>
+            </li>
+        </ul>
+        </nav>
+    </header>
+    {% block body %} {% endblock %}
+    <script src="//unpkg.com/alpinejs" defer></script>
+</body>
+</html>

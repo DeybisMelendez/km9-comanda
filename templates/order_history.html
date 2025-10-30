@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block title %}Historial de Comandas{% endblock %}
+
+{% block body %}
+<main class="container" x-data="{ fecha: '{{ fecha|default:'' }}' }">
+  <h1>📜 Historial de Comandas</h1>
+
+  <form method="get" class="grid">
+    <label for="fecha">Filtrar por fecha:</label>
+    <input
+      type="date"
+      name="fecha"
+      id="fecha"
+      x-model="fecha"
+      value="{{ fecha|default:'' }}"
+      required
+    >
+    <button type="submit">Filtrar</button>
+  </form>
+
+  <hr>
+
+  {% if orders %}
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Mesa</th>
+          <th>Hora</th>
+          <th>Estado</th>
+          <th>Total</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for order in orders %}
+          <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.table.name }}</td>
+            <td>{{ order.created_at|date:"H:i" }}</td>
+            <td>
+              {% if order.status == "pending" %}
+                <span style="color: orange;">Pendiente</span>
+              {% elif order.status == "served" %}
+                <span style="color: green;">Servida</span>
+              {% else %}
+                <span style="color: gray;">Cerrada</span>
+              {% endif %}
+            </td>
+            <td>${{ order.get_total }}</td>
+            <td>
+              <a href="{% url 'order_detail' order.id %}">Ver detalle</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <article>
+      <p>No hay comandas registradas para esta fecha.</p>
+    </article>
+  {% endif %}
+</main>
+{% endblock %}

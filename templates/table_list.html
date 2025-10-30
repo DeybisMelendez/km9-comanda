@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block title %}Mesas{% endblock %}
+{% block body %}
+<main class="container" x-data>
+  <h1>Mesas</h1>
+  <a href="{% url 'order_history' %}">📜 Historial del día</a>
+  <section class="grid">
+    {% for table in tables %}
+      <article>
+        <h3>{{ table.name }}</h3>
+        <a href="{% url 'create_order' table.id %}" role="button">Nueva Comanda</a>
+      </article>
+    {% endfor %}
+  </section>
+</main>
+{% endblock %}
