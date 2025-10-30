@@ -2,23 +2,25 @@
 {% block title %}Historial de Comandas{% endblock %}
 
 {% block body %}
-<main class="container" x-data="{ fecha: '{{ fecha|default:'' }}' }">
+<main class="container" x-data="{ fecha: '{{ target_date|date:"Y-m-d" }}' }">
   <h1>📜 Historial de Comandas</h1>
 
-  <form method="get" class="grid">
-    <label for="fecha">Filtrar por fecha:</label>
-    <input
-      type="date"
-      name="fecha"
-      id="fecha"
-      x-model="fecha"
-      value="{{ fecha|default:'' }}"
-      required
-    >
-    <button type="submit">Filtrar</button>
-  </form>
-
-  <hr>
+  <section class="grid">
+    <!-- Navegación por días -->
+    <div>
+      <a href="?days_ago={{ prev_days_ago }}" class="contrast">← Día anterior</a>
+    </div>
+    <div class="center">
+      <strong>{{ target_date|date:"d/m/Y" }}</strong>
+    </div>
+    <div class="end">
+      {% if days_ago > 0 %}
+        <a href="?days_ago={{ next_days_ago }}" class="contrast">Día siguiente →</a>
+      {% else %}
+        <span style="opacity:0.5;">Día siguiente →</span>
+      {% endif %}
+    </div>
+  </section>
 
   {% if orders %}
     <table>
@@ -38,19 +40,9 @@
             <td>{{ order.id }}</td>
             <td>{{ order.table.name }}</td>
             <td>{{ order.created_at|date:"H:i" }}</td>
-            <td>
-              {% if order.status == "pending" %}
-                <span style="color: orange;">Pendiente</span>
-              {% elif order.status == "served" %}
-                <span style="color: green;">Servida</span>
-              {% else %}
-                <span style="color: gray;">Cerrada</span>
-              {% endif %}
-            </td>
-            <td>${{ order.get_total }}</td>
-            <td>
-              <a href="{% url 'order_detail' order.id %}">Ver detalle</a>
-            </td>
+            <td>{{ order.get_status_display }}</td>
+            <td>C$ {{ order.get_total }}</td>
+            <td><a href="{% url 'order_detail' order.id %}">Ver detalle</a></td>
           </tr>
         {% endfor %}
       </tbody>

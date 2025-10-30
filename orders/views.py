@@ -6,9 +6,10 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db import transaction
 from decimal import Decimal
+from datetime import timedelta
 import csv
 from .models import (
-    Table, Product, Order, OrderItem,
+    Table, Product, ProductCategory,Order, OrderItem,
     Ingredient, IngredientStockAdjustment
 )
 
@@ -70,6 +71,7 @@ def mark_table_paid(request, table_id):
 def create_order(request, table_id):
     table = get_object_or_404(Table, id=table_id)
     products = Product.objects.all().order_by("category__name", "name")
+    categories = ProductCategory.objects.all().order_by("name")
 
     if request.method == "POST":
         order = Order.objects.create(table=table)
@@ -84,6 +86,7 @@ def create_order(request, table_id):
     return render(request, "create_order.html", {
         "table": table,
         "products": products,
+        "categories": categories,
     })
 
 
@@ -140,10 +143,28 @@ def edit_order(request, order_id):
 # -------------------------
 @login_required
 def order_history(request):
-    today = timezone.now().date()
-    orders = Order.objects.filter(created_at__date=today).order_by("-created_at")
-    return render(request, "order_history.html", {"orders": orders, "today": today})
+    # Obtener parámetro GET days_ago (por defecto 0)
+    days_ago = int(request.GET.get("days_ago", 0))
 
+    # Calcular la fecha objetivo
+    target_date = timezone.now().date() - timedelta(days=days_ago)
+
+    # Filtrar comandas por fecha específica
+    orders = Order.objects.filter(created_at__date=target_date).order_by("-created_at")
+
+    # Calcular días anterior y siguiente (limitando el siguiente a 0 = hoy)
+    prev_days_ago = days_ago + 1
+    next_days_ago = max(days_ago - 1, 0)
+
+    context = {
+        "orders": orders,
+        "target_date": target_date,
+        "days_ago": days_ago,
+        "prev_days_ago": prev_days_ago,
+        "next_days_ago": next_days_ago,
+    }
+
+    return render(request, "order_history.html", context)
 
 # -------------------------
 # 5. Reporte de Ventas del Día

@@ -7,14 +7,22 @@
   {% if orders %}
     {% for order in orders %}
       <article>
+        <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
         <h3>Comanda #{{ order.id }} - {{ order.get_status_display }}</h3>
         <p>Generado por: {{ order.user.username }}</p>
         <ul>
           {% for item in order.orderitem_set.all %}
-            <li>{{ item.quantity }} x {{ item.product.name }} — ${{ item.get_total|floatformat:2 }}</li>
+            <li>{{ item.quantity }} x {{ item.product.name }} — C$ {{ item.get_total|floatformat:2 }}</li>
           {% endfor %}
         </ul>
-        <p><strong>Total:</strong> ${{ order.get_total|floatformat:2 }}</p>
+        <p><strong>Total:</strong> C$ {{ order.get_total|floatformat:2 }}</p>
+        {% if not order.is_paid %}
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="mark_paid">
+          <button type="submit" class="contrast">Marcar como pagada</button>
+        </form>
+        {% endif %}
       </article>
     {% endfor %}
   {% else %}

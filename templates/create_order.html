@@ -1,24 +1,71 @@
 {% extends "layout.html" %}
 {% block title %}Crear Comanda{% endblock %}
 {% block body %}
-<main class="container" x-data="{items: {}}">
-  <h1>Comanda - {{ table.name }}</h1>
+<main class="container" 
+      x-data="{
+        showCategory: '',
+        products: {
+          {% for product in products %}
+          {{ product.id }}: {
+            'qty': 0,
+            'name': '{{product.name}}',
+            'price': {{product.price}}
+            }{% if not forloop.last %},{% endif %}
+          {% endfor %}
+        }
+      }">
+
+  <h1>Nueva Comanda - Mesa {{ table.name }}</h1>
+
+  <!-- Categorías -->
+  <h2>Categorías</h2>
+  <div class="list">
+    <button type="button" @click="showCategory=''">Todas</button>
+    {% for category in categories %}
+      <button type="button" @click="showCategory='{{ category.name }}'">{{ category.name }}</button>
+    {% endfor %}
+  </div>
+
+  <hr>
+
+  <!-- Formulario -->
   <form method="post">{% csrf_token %}
+    <h2 x-text="showCategory || 'Todos los productos'"></h2>
     <table>
       <thead>
-        <tr><th>Producto</th><th>Precio</th><th>Cantidad</th></tr>
+        <tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Cantidad</th>
+        </tr>
       </thead>
       <tbody>
         {% for product in products %}
-        <tr>
+        <tr x-show="showCategory==='' || showCategory==='{{ product.category.name }}'">
           <td>{{ product.name }}</td>
-          <td>C${{ product.price }}</td>
-          <td><input type="number" name="product_{{ product.id }}" min="0" value="0"></td>
+          <td>C$ {{ product.price }}</td>
+          <td>
+            <input type="number" 
+              name="product_{{ product.id }}" 
+              min="0" 
+              x-model.number="products[{{ product.id }}].qty">
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+    <!-- Resumen de productos -->
+  <h2>Resumen de Productos</h2>
+  <template x-for="(product, id) in products" :key="id">
+    <div x-show="product.qty > 0" class="card">
+      <span x-text="`${product.name} - ${product.qty} x C$ ${product.price} = C$ ${product.qty * product.price}`"></span>
+    </div>
+  </template>
+  <strong>Total: C$ <span x-text="Object.values(products).reduce((sum, p) => sum + p.qty * p.price, 0)"></span></strong>
+
     <button type="submit">Crear Comanda</button>
   </form>
+  
+
 </main>
 {% endblock %}
