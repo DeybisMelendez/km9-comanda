@@ -1,9 +1,8 @@
 {% extends "layout.html" %}
 {% block title %}Mesas{% endblock %}
 {% block body %}
-<main class="container" x-data>
+<main class="container" x-data="{modal: false, tableName:'', tableTotal:'', tableId:''}">
   <h1>Mesas</h1>
-  <a href="{% url 'order_history' %}" role="button" class="secondary">📜 Historial del día</a>
 
   <section class="list">
     {% for item in table_data %}
@@ -14,15 +13,28 @@
 
         <p>C$ {{ item.total_due|floatformat:2 }}</p>
 
-        <footer>
+        <div role="group">
           <a href="{% url 'create_order' item.table.id %}" role="button">➕</a>
           <a href="{% url 'table_orders' item.table.id %}" role="button" class="secondary">📋</a>
           {% if item.total_due > 0 %}
-          <a href="{% url 'mark_table_paid' item.table.id %}" role="button" class="contrast">✅</a>
+          <button @click="tableName='{{item.table.name}}';tableTotal={{item.total_due}};tableId='{{item.table.id}}';modal=true" class="contrast">✅</button>
           {% endif %}
-        </footer>
+        </div>
       </article>
     {% endfor %}
+    <dialog x-bind:open="modal" x-show="modal">
+        <article @click.outside="modal=false">
+            <h2>Pagar mesa <span x-text="tableName"></span></h2>
+            <p>¿Desea marcar pagado la mesa <span x-text="tableName"></span>?</p>
+            <b>Total: C$ <span x-text="tableTotal"></span></b>
+            <footer>
+                <button class="secondary" @click.prevent="modal = false">
+                    Cancelar
+                </button>
+                <a role="button" :href="'/mesa/'+ tableId + '/pagar/'">Confirmar</a>
+            </footer>
+        </article>
+    </dialog>
   </section>
 </main>
 {% endblock %}

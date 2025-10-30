@@ -4,6 +4,8 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.utils import timezone
 from django.contrib.auth.models import User
+from django.db import transaction
+from decimal import Decimal
 import csv
 from .models import (
     Table, Product, Order, OrderItem,
@@ -149,7 +151,7 @@ def order_history(request):
 @login_required
 def daily_report(request):
     today = timezone.now().date()
-    orders = Order.objects.filter(created_at__date=today, status="closed")
+    orders = Order.objects.filter(created_at__date=today, is_paid="True").order_by("-created_at")
 
     total_sales = sum(o.get_total() for o in orders)
     product_summary = {}
@@ -169,28 +171,67 @@ def daily_report(request):
 # 6. Ajustes / Compras de Inventario
 # -------------------------
 @login_required
-def inventory_list(request):
+def inventory_adjustment(request):
     ingredients = Ingredient.objects.all().order_by("name")
-    return render(request, "inventory_list.html", {"ingredients": ingredients})
-
-
-@login_required
-def add_stock_adjustment(request, ingredient_id):
-    ingredient = get_object_or_404(Ingredient, id=ingredient_id)
 
     if request.method == "POST":
-        qty = request.POST.get("quantity")
-        reason = request.POST.get("reason", "Ajuste manual")
-        IngredientStockAdjustment.objects.create(
-            ingredient=ingredient,
-            quantity=qty,
-            reason=reason
-        )
-        messages.success(request, f"Ajuste aplicado a {ingredient.name}.")
-        return redirect("inventory_list")
+        # Usamos una transacción para asegurar consistencia
+        with transaction.atomic():
+            for ingredient in ingredients:
+                field_name = f"found_{ingredient.id}"
+                found_qty_str = request.POST.get(field_name)
+                if found_qty_str is None or found_qty_str.strip() == "":
+                    continue
 
-    return render(request, "add_stock_adjustment.html", {"ingredient": ingredient})
+                found_qty = Decimal(found_qty_str)
+                diff = found_qty - ingredient.stock_quantity
 
+                # Si hay diferencia, generamos ajuste
+                if diff != 0:
+                    IngredientStockAdjustment.objects.create(
+                        ingredient=ingredient,
+                        quantity=diff,
+                        reason=f"Ajuste por inventario físico (hecho por {request.user.username})",
+                    )
+
+            messages.success(request, "✅ Ajustes de inventario aplicados correctamente.")
+        return redirect("inventory")
+
+    return render(request, "inventory.html", {"ingredients": ingredients})
+
+@login_required
+def purchase_ingredients(request):
+    ingredients = Ingredient.objects.all().order_by("name")
+
+    if request.method == "POST":
+        with transaction.atomic():
+            count = 0
+            for ingredient in ingredients:
+                field_name = f"purchase_{ingredient.id}"
+                qty_str = request.POST.get(field_name)
+
+                if not qty_str or qty_str.strip() == "":
+                    continue
+
+                qty = Decimal(qty_str)
+                if qty <= 0:
+                    # No permitir negativos o cero
+                    continue
+
+                IngredientStockAdjustment.objects.create(
+                    ingredient=ingredient,
+                    quantity=qty,
+                    reason=f"Ingreso por compra (registrado por {request.user.username})",
+                )
+                count += 1
+
+            if count > 0:
+                messages.success(request, f"✅ Se registraron {count} compras de ingredientes correctamente.")
+            else:
+                messages.info(request, "No se registró ninguna compra.")
+        return redirect("purchase_ingredients")
+
+    return render(request, "purchase_ingredients.html", {"ingredients": ingredients})
 
 # -------------------------
 # 7. Exportar a CSV

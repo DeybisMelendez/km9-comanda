@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+{% block body %}
+<main class="container" x-data>
+  <h1>🛒 Registrar Compras de Ingredientes</h1>
+  <p>Indica la cantidad de cada ingrediente que deseas agregar al inventario.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <table>
+      <thead>
+        <tr>
+          <th>Ingrediente</th>
+          <th>Unidad</th>
+          <th>Stock Actual</th>
+          <th>Cantidad a Comprar</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ing in ingredients %}
+        <tr>
+          <td>{{ ing.name }}</td>
+          <td>{{ ing.unit }}</td>
+          <td>{{ ing.stock_quantity }}</td>
+          <td>
+            <input
+              type="number"
+              name="purchase_{{ ing.id }}"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              x-on:focus="$el.select()"
+            />
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button type="submit" class="contrast">💾 Registrar Compras</button>
+  </form>
+</main>
+{% endblock %}

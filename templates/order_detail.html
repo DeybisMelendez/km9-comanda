@@ -2,29 +2,35 @@
 {% block title %}Detalle de Comanda{% endblock %}
 {% block body %}
 <main class="container">
-  <h1>Comanda #{{ order.id }} - {{ order.table.name }}</h1>
+  <h1>Comanda #{{ order.id }} - Mesa {{ order.table.name }}</h1>
+  <p>Fecha de creación: {{ order.created_at|date:"d/m/Y H:i" }}</p>
   <p>Estado: {% if order.is_paid %}Pagado{% else %}Pendiente{% endif %}</p>
   <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
 
   <table>
     <thead>
-      <tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Total</th></tr>
+      <tr>
+        <th>Producto</th>
+        <th>Cant.</th>
+        <th>Precio</th>
+        <th>Total</th>
+      </tr>
     </thead>
     <tbody>
       {% for item in items %}
       <tr>
         <td>{{ item.product.name }}</td>
         <td>{{ item.quantity }}</td>
-        <td>C${{ item.product.price }}</td>
-        <td>C${{ item.get_total }}</td>
+        <td>C$ {{ item.product.price }}</td>
+        <td>C$ {{ item.get_total }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 
-  <p><strong>Total: C${{ total }}</strong></p>
+  <p><strong>Total: C$ {{ total }}</strong></p>
 
-  {% if order.status != 'closed' %}
+  {% if not order.is_paid %}
   <form method="post">{% csrf_token %}
     <input type="hidden" name="action" value="mark_paid">
     <button type="submit" class="contrast">Marcar como pagada</button>

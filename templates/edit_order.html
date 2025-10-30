@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block title %}Editar Comanda #{{ order.id }}{% endblock %}
 {% block body %}
-<main class="container" x-data="{ confirm: false }">
+<main class="container" x-data="{ confirm: false, modal: false }">
   <h1>Editar Comanda #{{ order.id }}</h1>
 
-  <form method="post" @submit.prevent="confirm = true">
+  <form method="post">
     {% csrf_token %}
 
     <label for="table">Mesa</label>
@@ -34,30 +34,20 @@
 
     <footer style="margin-top: 1rem; display: flex; gap: 1rem;">
       <a href="{% url 'order_detail' order.id %}" role="button" class="secondary">← Cancelar</a>
-      <button type="submit">💾 Guardar Cambios</button>
+      <button @click.prevent="modal=true">💾 Guardar Cambios</button>
     </footer>
+    <dialog x-bind:open="modal" x-show="modal">
+        <article @click.outside="modal=false">
+            <h2>Confirmar cambios</h2>
+            <p>¿Deseas guardar los cambios realizados en esta comanda?</p>
+            <footer>
+                <button class="secondary" @click.prevent="modal = false">
+                    Cancelar
+                </button>
+                <button>Confirmar</button>
+            </footer>
+        </article>
+    </dialog>
   </form>
-
-  <!-- Modal de confirmación -->
-  <dialog x-show="confirm" @click.outside="confirm = false" open>
-    <article>
-      <h3>¿Confirmar cambios?</h3>
-      <p>¿Deseas guardar los cambios realizados en esta comanda?</p>
-      <footer>
-        <button @click="confirm = false">Cancelar</button>
-        <button type="submit" form="form" @click="$el.closest('form').submit()">Confirmar</button>
-      </footer>
-    </article>
-  </dialog>
 </main>
-
-<style>
-dialog[open] {
-  animation: fadeIn 0.3s ease;
-}
-@keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
-}
-</style>
 {% endblock %}

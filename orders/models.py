@@ -109,6 +109,9 @@ class Order(models.Model):
     user = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     is_paid = models.BooleanField(default=False)
+    
+    def get_status_display(self):
+        return "Pagada" if self.is_paid else "Pendiente"
 
     def get_total(self):
         return sum(item.get_total() for item in self.orderitem_set.all())
