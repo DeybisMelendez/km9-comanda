@@ -35,8 +35,13 @@
             </a>
             </li>
             <li>
-            <a href="{% url 'inventory_list' %}" {% if '/inventario' in request.path %}aria-current="page"{% endif %}>
-                Inventario
+            <a href="{% url 'inventory_adjustment' %}" {% if '/inventario' in request.path %}aria-current="page"{% endif %}>
+                Ajustes de Inventario
+            </a>
+            </li>
+            <li>
+            <a href="{% url 'purchase_ingredients' %}" {% if '/inventario' in request.path %}aria-current="page"{% endif %}>
+                Compras de Ingredientes
             </a>
             </li>
             <li>

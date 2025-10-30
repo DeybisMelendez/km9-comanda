@@ -241,7 +241,6 @@ def inventory_adjustment(request):
                     )
 
             messages.success(request, "✅ Ajustes de inventario aplicados correctamente.")
-        return redirect("inventory")
 
     return render(request, "inventory.html", {"ingredients": ingredients})
 
