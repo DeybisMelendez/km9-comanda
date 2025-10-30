@@ -1,18 +1,62 @@
 {% extends "layout.html" %}
 {% block title %}Reporte Diario{% endblock %}
+
 {% block body %}
-<main class="container">
-  <h1>Reporte de Ventas - {{ today }}</h1>
+<main class="container" x-data="{ fecha: '{{ target_date|date:"Y-m-d" }}' }">
+  <h1>Reporte de Ventas</h1>
 
-  <h2>Totales</h2>
-  <ul>
-    {% for name, qty in product_summary.items %}
-    <li>{{ name }} — {{ qty }}</li>
-    {% endfor %}
-  </ul>
+  <section class="grid">
+    <div>
+      <a href="?days_ago={{ prev_days_ago }}" class="contrast">← Día anterior</a>
+    </div>
+    <div class="center">
+      <strong>{{ target_date|date:"d/m/Y" }}</strong>
+    </div>
+    <div class="end">
+      {% if days_ago > 0 %}
+        <a href="?days_ago={{ next_days_ago }}" class="contrast">Día siguiente →</a>
+      {% else %}
+        <span style="opacity:0.5;">Día siguiente →</span>
+      {% endif %}
+    </div>
+  </section>
 
-  <p><strong>Total del día: C${{ total_sales }}</strong></p>
+  <hr>
 
-  <a href="{% url 'export_orders_csv' %}" role="button">Descargar CSV</a>
+  {% if product_summary %}
+    <h2>Resumen por Producto</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio Unitario</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name, data in product_summary.items %}
+        <tr>
+          <td>{{ name }}</td>
+          <td>C$ {{ data.price }}</td>
+          <td>{{ data.qty }}</td>
+          <td>C$ {{ data.subtotal }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3">Total del día</th>
+          <th>C$ {{ total_sales }}</th>
+        </tr>
+      </tfoot>
+    </table>
+
+    <a href="{% url 'export_orders_csv' %}" role="button">Descargar CSV</a>
+  {% else %}
+    <article>
+      <p>No hay ventas registradas para esta fecha.</p>
+    </article>
+  {% endif %}
 </main>
 {% endblock %}

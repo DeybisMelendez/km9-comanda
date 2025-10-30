@@ -171,22 +171,47 @@ def order_history(request):
 # -------------------------
 @login_required
 def daily_report(request):
-    today = timezone.now().date()
-    orders = Order.objects.filter(created_at__date=today, is_paid="True").order_by("-created_at")
+    from datetime import timedelta
+    from django.utils import timezone
 
-    total_sales = sum(o.get_total() for o in orders)
+    days_ago = int(request.GET.get("days_ago", 0))
+    target_date = timezone.now().date() - timedelta(days=days_ago)
+
+    # Filtrar órdenes pagadas
+    orders = Order.objects.filter(
+        created_at__date=target_date,
+        is_paid=True
+    ).order_by("-created_at")
+
+    # Totales y resumen por producto (cantidad y subtotal)
     product_summary = {}
+    total_sales = 0
     for order in orders:
         for item in order.orderitem_set.all():
-            product_summary[item.product.name] = product_summary.get(item.product.name, 0) + item.quantity
+            if item.product.name not in product_summary:
+                product_summary[item.product.name] = {
+                    "qty": 0,
+                    "price": item.product.price,
+                    "subtotal": 0
+                }
+            product_summary[item.product.name]["qty"] += item.quantity
+            product_summary[item.product.name]["subtotal"] += item.quantity * item.product.price
+            total_sales += item.quantity * item.product.price
 
-    return render(request, "daily_report.html", {
+    prev_days_ago = days_ago + 1
+    next_days_ago = max(days_ago - 1, 0)
+
+    context = {
         "orders": orders,
-        "today": today,
+        "target_date": target_date,
+        "days_ago": days_ago,
+        "prev_days_ago": prev_days_ago,
+        "next_days_ago": next_days_ago,
         "total_sales": total_sales,
         "product_summary": product_summary,
-    })
+    }
 
+    return render(request, "daily_report.html", context)
 
 # -------------------------
 # 6. Ajustes / Compras de Inventario
