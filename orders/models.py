@@ -106,14 +106,9 @@ class IngredientStockAdjustment(models.Model):
 
 class Order(models.Model):
     table = models.ForeignKey(Table, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    STATUS_CHOICES = [
-        ("pending", "Pendiente"),
-        ("served", "Servida"),
-        ("closed", "Cerrada"),
-    ]
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    is_paid = models.BooleanField(default=False)
 
     def get_total(self):
         return sum(item.get_total() for item in self.orderitem_set.all())

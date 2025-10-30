@@ -3,12 +3,24 @@
 {% block body %}
 <main class="container" x-data>
   <h1>Mesas</h1>
-  <a href="{% url 'order_history' %}">📜 Historial del día</a>
-  <section class="grid">
-    {% for table in tables %}
+  <a href="{% url 'order_history' %}" role="button" class="secondary">📜 Historial del día</a>
+
+  <section class="list">
+    {% for item in table_data %}
       <article>
-        <h3>{{ table.name }}</h3>
-        <a href="{% url 'create_order' table.id %}" role="button">Nueva Comanda</a>
+        <header>
+          <h3>Mesa {{ item.table.name }}</h3>
+        </header>
+
+        <p>C$ {{ item.total_due|floatformat:2 }}</p>
+
+        <footer>
+          <a href="{% url 'create_order' item.table.id %}" role="button">➕</a>
+          <a href="{% url 'table_orders' item.table.id %}" role="button" class="secondary">📋</a>
+          {% if item.total_due > 0 %}
+          <a href="{% url 'mark_table_paid' item.table.id %}" role="button" class="contrast">✅</a>
+          {% endif %}
+        </footer>
       </article>
     {% endfor %}
   </section>

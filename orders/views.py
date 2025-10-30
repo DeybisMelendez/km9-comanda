@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse
 from django.utils import timezone
+from django.contrib.auth.models import User
 import csv
 from .models import (
     Table, Product, Order, OrderItem,
@@ -13,10 +14,51 @@ from .models import (
 # -------------------------
 # 1. Selección de Mesa
 # -------------------------
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum, F
+from .models import Table, Order, OrderItem
+
+
 @login_required
 def table_list(request):
     tables = Table.objects.all().order_by("name")
-    return render(request, "table_list.html", {"tables": tables})
+    table_data = []
+    for table in tables:
+        # Total de órdenes pendientes o servidas
+        total_due = (
+            Order.objects.filter(table=table, is_paid=False)
+            .annotate(order_total=Sum(F("orderitem__quantity") * F("orderitem__product__price")))
+            .aggregate(total=Sum("order_total"))["total"]
+            or 0
+        )
+        table_data.append({"table": table, "total_due": total_due})
+
+    return render(request, "table_list.html", {"table_data": table_data})
+
+
+@login_required
+def table_orders(request, table_id):
+    table = get_object_or_404(Table, id=table_id)
+    orders = (
+        Order.objects.filter(table=table, is_paid=False)
+        .prefetch_related("orderitem_set__product")
+        .order_by("-created_at")
+    )
+
+    return render(request, "table_orders.html", {"table": table, "orders": orders})
+
+
+@login_required
+def mark_table_paid(request, table_id):
+    """Marca todas las órdenes pendientes o servidas de la mesa como pagadas."""
+    table = get_object_or_404(Table, id=table_id)
+    orders = Order.objects.filter(table=table, is_paid=False)
+    for order in orders:
+        order.is_paid = True
+        order.save()
+    messages.success(request, f"Comandas de la mesa {table.name} marcada como pagada.")
+    return redirect("table_list")
 
 
 # -------------------------
@@ -54,9 +96,9 @@ def order_detail(request, order_id):
     if request.method == "POST":
         action = request.POST.get("action")
         if action == "mark_paid":
-            order.status = "closed"
+            order.is_paid = True
             order.save()
-            messages.success(request, "Orden marcada como pagada.")
+            messages.success(request, f"Comanda #{order.id} marcada como pagada.")
             return redirect("table_list")
 
     return render(request, "order_detail.html", {
@@ -64,6 +106,31 @@ def order_detail(request, order_id):
         "items": items,
         "total": order.get_total(),
     })
+
+@login_required
+def edit_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    tables = Table.objects.all().order_by("name")
+    users = User.objects.all().order_by("username")
+
+    if request.method == "POST":
+        table_id = request.POST.get("table")
+        user_id = request.POST.get("user")
+        is_paid = request.POST.get("is_paid") == "on"
+
+        order.table = Table.objects.get(id=table_id) if table_id else None
+        order.user = User.objects.get(id=user_id) if user_id else None
+        order.is_paid = is_paid
+        order.save()
+
+        messages.success(request, "✅ Comanda actualizada correctamente.")
+        return redirect("order_detail", order_id=order.id)
+
+    return render(
+        request,
+        "edit_order.html",
+        {"order": order, "tables": tables, "users": users},
+    )
 
 
 # -------------------------

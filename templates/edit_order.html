@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}Editar Comanda #{{ order.id }}{% endblock %}
+{% block body %}
+<main class="container" x-data="{ confirm: false }">
+  <h1>Editar Comanda #{{ order.id }}</h1>
+
+  <form method="post" @submit.prevent="confirm = true">
+    {% csrf_token %}
+
+    <label for="table">Mesa</label>
+    <select name="table" id="table" required>
+      <option value="">-- Seleccionar Mesa --</option>
+      {% for table in tables %}
+        <option value="{{ table.id }}" {% if order.table and order.table.id == table.id %}selected{% endif %}>
+          Mesa {{ table.name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label for="user">Mesero</label>
+    <select name="user" id="user" required>
+      <option value="">-- Seleccionar Mesero --</option>
+      {% for user in users %}
+        <option value="{{ user.id }}" {% if order.user and order.user.id == user.id %}selected{% endif %}>
+          {{ user.username }}
+        </option>
+      {% endfor %}
+    </select>
+
+    <label>
+      <input type="checkbox" name="is_paid" {% if order.is_paid %}checked{% endif %}>
+      Marcar como pagado
+    </label>
+
+    <footer style="margin-top: 1rem; display: flex; gap: 1rem;">
+      <a href="{% url 'order_detail' order.id %}" role="button" class="secondary">← Cancelar</a>
+      <button type="submit">💾 Guardar Cambios</button>
+    </footer>
+  </form>
+
+  <!-- Modal de confirmación -->
+  <dialog x-show="confirm" @click.outside="confirm = false" open>
+    <article>
+      <h3>¿Confirmar cambios?</h3>
+      <p>¿Deseas guardar los cambios realizados en esta comanda?</p>
+      <footer>
+        <button @click="confirm = false">Cancelar</button>
+        <button type="submit" form="form" @click="$el.closest('form').submit()">Confirmar</button>
+      </footer>
+    </article>
+  </dialog>
+</main>
+
+<style>
+dialog[open] {
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block title %}Comandas - Mesa {{ table.name }}{% endblock %}
+{% block body %}
+<main class="container">
+  <h1>Comandas de Mesa {{ table.name }}</h1>
+
+  {% if orders %}
+    {% for order in orders %}
+      <article>
+        <h3>Orden #{{ order.id }} - {{ order.get_status_display }}</h3>
+        <ul>
+          {% for item in order.orderitem_set.all %}
+            <li>{{ item.quantity }} x {{ item.product.name }} — ${{ item.get_total|floatformat:2 }}</li>
+          {% endfor %}
+        </ul>
+        <p><strong>Total:</strong> ${{ order.get_total|floatformat:2 }}</p>
+      </article>
+    {% endfor %}
+  {% else %}
+    <p>No hay comandas pendientes para esta mesa.</p>
+  {% endif %}
+</main>
+{% endblock %}

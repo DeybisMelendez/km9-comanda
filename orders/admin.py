@@ -75,8 +75,8 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ("id", "table", "status", "created_at", "get_total_display")
-    list_filter = ("status", "created_at", "table")
+    list_display = ("id", "table", "is_paid", "created_at", "get_total_display")
+    list_filter = ("is_paid", "created_at", "table")
     date_hierarchy = "created_at"
     inlines = [OrderItemInline]
 
@@ -88,7 +88,7 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
     list_display = ("order", "product", "quantity", "get_total_display")
-    list_filter = ("order__status", "product")
+    list_filter = ("order__is_paid", "product")
     search_fields = ("product__name", "order__id")
 
     def get_total_display(self, obj):

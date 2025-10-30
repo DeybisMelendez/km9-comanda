@@ -3,7 +3,8 @@
 {% block body %}
 <main class="container">
   <h1>Comanda #{{ order.id }} - {{ order.table.name }}</h1>
-  <p>Estado: <strong>{{ order.get_status_display }}</strong></p>
+  <p>Estado: {% if order.is_paid %}Pagado{% else %}Pendiente{% endif %}</p>
+  <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
 
   <table>
     <thead>
