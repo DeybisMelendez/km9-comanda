@@ -6,17 +6,12 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db import transaction
 from decimal import Decimal
-from datetime import timedelta
+from datetime import datetime, timedelta
 import csv
 from .models import (
     Table, Product, ProductCategory,Order, OrderItem,
-    Ingredient, IngredientStockAdjustment
+    Ingredient, IngredientMovement
 )
-
-
-# -------------------------
-# 1. Selección de Mesa
-# -------------------------
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
@@ -68,20 +63,36 @@ def mark_table_paid(request, table_id):
 # 2. Crear Comanda
 # -------------------------
 @login_required
+def print_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id)
+    items = OrderItem.objects.filter(order=order)
+
+    return render(request, "print_order.html", {
+        "order": order,
+        "items": items,
+        "total": order.get_total(),
+    })
+
+@login_required
 def create_order(request, table_id):
     table = get_object_or_404(Table, id=table_id)
     products = Product.objects.all().order_by("category__name", "name")
     categories = ProductCategory.objects.all().order_by("name")
 
     if request.method == "POST":
-        order = Order.objects.create(table=table)
+        order = Order.objects.create(table=table, user=request.user)
         for key, value in request.POST.items():
             if key.startswith("product_") and int(value) > 0:
                 product_id = key.split("_")[1]
                 product = Product.objects.get(id=product_id)
                 OrderItem.objects.create(order=order, product=product, quantity=int(value))
         messages.success(request, "Comanda creada con éxito.")
-        return redirect("order_detail", order.id)
+        return render(request, "create_order.html", {
+            "table": table,
+            "products": products,
+            "categories": categories,
+            "order": order,
+        })
 
     return render(request, "create_order.html", {
         "table": table,
@@ -171,9 +182,6 @@ def order_history(request):
 # -------------------------
 @login_required
 def daily_report(request):
-    from datetime import timedelta
-    from django.utils import timezone
-
     days_ago = int(request.GET.get("days_ago", 0))
     target_date = timezone.now().date() - timedelta(days=days_ago)
 
@@ -217,7 +225,7 @@ def daily_report(request):
 # 6. Ajustes / Compras de Inventario
 # -------------------------
 @login_required
-def inventory_adjustment(request):
+def inventory_movement(request):
     ingredients = Ingredient.objects.all().order_by("name")
 
     if request.method == "POST":
@@ -234,9 +242,10 @@ def inventory_adjustment(request):
 
                 # Si hay diferencia, generamos ajuste
                 if diff != 0:
-                    IngredientStockAdjustment.objects.create(
+                    IngredientMovement.objects.create(
                         ingredient=ingredient,
                         quantity=diff,
+                        user=request.user,
                         reason=f"Ajuste por inventario físico (hecho por {request.user.username})",
                     )
 
@@ -262,11 +271,11 @@ def purchase_ingredients(request):
                 if qty <= 0:
                     # No permitir negativos o cero
                     continue
-
-                IngredientStockAdjustment.objects.create(
+                IngredientMovement.objects.create(
                     ingredient=ingredient,
                     quantity=qty,
-                    reason=f"Ingreso por compra (registrado por {request.user.username})",
+                    user=request.user,
+                    reason="Compra de ingredientes"
                 )
                 count += 1
 
@@ -278,29 +287,94 @@ def purchase_ingredients(request):
 
     return render(request, "purchase_ingredients.html", {"ingredients": ingredients})
 
-# -------------------------
-# 7. Exportar a CSV
-# -------------------------
+
+def parse_date_range(request):
+    """Helper para obtener rango de fechas desde GET."""
+    date_format = "%Y-%m-%dT%H:%M"
+    start_str = request.GET.get("start")
+    end_str = request.GET.get("end")
+
+    if start_str and end_str:
+        start = datetime.strptime(start_str, date_format)
+        end = datetime.strptime(end_str, date_format)
+    else:
+        # Por defecto, día actual completo
+        today = timezone.now().date()
+        start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+        end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+    return start, end
+
+@login_required
+def report_orders(request):
+    start, end = parse_date_range(request)
+    order_items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
+        "order", "product", "order__table", "order__user"
+    )
+
+    return render(request, "report_orders.html", {
+        "order_items": order_items,
+        "start": start,
+        "end": end,
+    })
+
+
 @login_required
 def export_orders_csv(request):
+    start, end = parse_date_range(request)
+    order_items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
+        "order", "product", "order__table", "order__user"
+    )
+
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f'attachment; filename="comandas_{timezone.now().date()}.csv"'
+    response["Content-Disposition"] = 'attachment; filename="reporte_comandas.csv"'
 
     writer = csv.writer(response)
-    writer.writerow(["Fecha", "Hora", "Comanda", "Mesa", "Producto", "Cantidad", "Precio", "Monto"])
+    writer.writerow(["Fecha y hora", "No de Comanda", "Mesero", "Mesa", "Cantidad", "Producto", "Precio", "Monto"])
 
-    orders = Order.objects.all().order_by("-created_at")
-    for order in orders:
-        for item in order.orderitem_set.all():
-            writer.writerow([
-                order.created_at.date(),
-                order.created_at.time().strftime("%H:%M"),
-                order.id,
-                order.table.name if order.table else "Sin mesa",
-                item.product.name,
-                item.quantity,
-                item.product.price,
-                item.get_total(),
-            ])
+    for item in order_items:
+        writer.writerow([
+            item.order.created_at.strftime("%Y-%m-%d %H:%M"),
+            item.order.id,
+            item.order.user.username if item.order.user else "—",
+            item.order.table.name if item.order.table else "—",
+            item.quantity,
+            item.product.name,
+            item.product.price,
+            item.get_total(),
+        ])
+
+    return response
+
+@login_required
+def report_movements(request):
+    start, end = parse_date_range(request)
+    movements = IngredientMovement.objects.filter(created_at__range=(start, end)).select_related("ingredient")
+
+    return render(request, "report_movements.html", {
+        "movements": movements,
+        "start": start,
+        "end": end,
+    })
+
+
+@login_required
+def export_movements_csv(request):
+    start, end = parse_date_range(request)
+    movements = IngredientMovement.objects.filter(created_at__range=(start, end)).select_related("ingredient")
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="reporte_ajustes.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Fecha y hora", "Valor del ajuste", "Ingrediente", "Razón", "Usuario"])
+
+    for mov in movements:
+        writer.writerow([
+            mov.created_at.strftime("%Y/%m/%d %H:%M"),
+            mov.quantity,
+            mov.ingredient.name,
+            mov.reason or "—",
+            mov.user.username if mov.user else "—",
+        ])
 
     return response

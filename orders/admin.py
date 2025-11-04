@@ -5,8 +5,7 @@ from .models import (
     Product,
     Ingredient,
     ProductIngredient,
-    IngredientUsage,
-    IngredientStockAdjustment,
+    IngredientMovement,
     Order,
     OrderItem,
 )
@@ -51,22 +50,19 @@ class ProductIngredientAdmin(admin.ModelAdmin):
     list_filter = ("product", "ingredient")
     search_fields = ("product__name", "ingredient__name")
 
+@admin.register(IngredientMovement)
+class IngredientMovementAdmin(admin.ModelAdmin):
+    list_display = ("ingredient", "quantity", "reason", "user", "created_at")
+    list_filter = ("ingredient", "user", "created_at")
+    search_fields = ("ingredient__name", "reason", "user__username")
+    ordering = ("-created_at",)
+    readonly_fields = ("created_at",)
 
-@admin.register(IngredientUsage)
-class IngredientUsageAdmin(admin.ModelAdmin):
-    list_display = ("ingredient", "quantity_used", "unit", "order_item", "created_at")
-    list_filter = ("ingredient", "unit", "created_at")
-    search_fields = ("ingredient__name", "order_item__product__name")
-    date_hierarchy = "created_at"
-
-
-@admin.register(IngredientStockAdjustment)
-class IngredientStockAdjustmentAdmin(admin.ModelAdmin):
-    list_display = ("ingredient", "quantity", "reason", "adjusted_at")
-    list_filter = ("ingredient", "adjusted_at")
-    search_fields = ("ingredient__name", "reason")
-    date_hierarchy = "adjusted_at"
-
+    def save_model(self, request, obj, form, change):
+        """Asigna automáticamente el usuario que realiza el movimiento."""
+        if not obj.user:
+            obj.user = request.user
+        super().save_model(request, obj, form, change)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem

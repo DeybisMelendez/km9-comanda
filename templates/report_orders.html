@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block title %}Reporte de Comandas{% endblock %}
+{% block body %}
+<main class="container">
+  <h1>📊 Reporte de Comandas</h1>
+
+  <form method="get">
+    <div class="grid">
+        <div>
+            <label>Desde:</label>
+            <input type="datetime-local" name="start" value="{{ start|date:'Y-m-d\\TH:i' }}">
+        </div>
+        <div>
+            <label>Hasta:</label>
+            <input type="datetime-local" name="end" value="{{ end|date:'Y-m-d\\TH:i' }}">
+        </div>
+    </div>
+    <button type="submit">Filtrar</button>
+  </form>
+
+  <hr>
+
+  {% if order_items %}
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha y hora</th>
+        <th>Comanda</th>
+        <th>Mesero</th>
+        <th>Mesa</th>
+        <th>Cantidad</th>
+        <th>Producto</th>
+        <th>Precio</th>
+        <th>Monto</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in order_items %}
+      <tr>
+        <td>{{ item.order.created_at|date:"d/m/Y H:i" }}</td>
+        <td>{{ item.order.id }}</td>
+        <td>{{ item.order.user.username|default:"—" }}</td>
+        <td>{{ item.order.table.name|default:"—" }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.product.name }}</td>
+        <td>C$ {{ item.product.price }}</td>
+        <td>C$ {{ item.get_total }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p>No hay registros en este rango de fechas.</p>
+  {% endif %}
+    <a href="{% url 'export_orders_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
+</main>
+{% endblock %}

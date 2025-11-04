@@ -3,9 +3,10 @@
 {% block body %}
 <main class="container">
   <h1>Comanda #{{ order.id }} - Mesa {{ order.table.name }}</h1>
+  <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
   <p>Fecha de creación: {{ order.created_at|date:"d/m/Y H:i" }}</p>
   <p>Estado: {% if order.is_paid %}Pagado{% else %}Pendiente{% endif %}</p>
-  <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
+  <p>Mesero: {{order.user}}</p>
 
   <table>
     <thead>
@@ -29,7 +30,18 @@
   </table>
 
   <p><strong>Total: C$ {{ total }}</strong></p>
-
+  <div 
+    x-data="{
+        comandaHtml: '',
+        async printOrder() {
+            const response = await fetch('{% url "print_order" order.id %}');
+            this.comandaHtml = await response.text();
+        }
+    }"
+  >
+    <iframe :srcdoc="comandaHtml" frameborder="0" style="display: none"></iframe>
+    <button type="button" @click="printOrder()">🖨️ Imprimir Comanda</button>
+  </div>
   {% if not order.is_paid %}
   <form method="post">{% csrf_token %}
     <input type="hidden" name="action" value="mark_paid">

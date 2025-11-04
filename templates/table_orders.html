@@ -9,7 +9,7 @@
       <article>
         <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
         <h3>Comanda #{{ order.id }} - {{ order.get_status_display }}</h3>
-        <p>Generado por: {{ order.user.username }}</p>
+        <p>Mesero: {{ order.user.username }}</p>
         <ul>
           {% for item in order.orderitem_set.all %}
             <li>{{ item.quantity }} x {{ item.product.name }} — C$ {{ item.get_total|floatformat:2 }}</li>

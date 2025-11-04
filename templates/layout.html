@@ -1,58 +1,91 @@
 {% load static %}
-
+{% load django_htmx %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %}</title>
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.pumpkin.min.css"
-    >
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="googlebot" content="noindex" />
+  <link rel="manifest" href="{% static 'manifest.json' %}" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>{% block title %}Panel de Comandas{% endblock %}</title>
+    {% htmx_script %}
+  <!-- PicoCSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.pumpkin.min.css"
+  >
+  <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
-<body>
-    <header class="container">
-        <nav>
-        <ul>
-            <li><strong>🍗 Comandas</strong></li>
-        </ul>
-        <ul>
-            <li>
-            <a href="{% url 'table_list' %}" {% if request.path == '/' %}aria-current="page"{% endif %}>
-                Mesas
-            </a>
-            </li>
-            <li>
-            <a href="{% url 'order_history' %}" {% if '/historial' in request.path %}aria-current="page"{% endif %}>
-                Historial
-            </a>
-            </li>
-            <li>
-            <a href="{% url 'daily_report' %}" {% if '/reporte' in request.path %}aria-current="page"{% endif %}>
-                Reporte Diario
-            </a>
-            </li>
-            <li>
-            <a href="{% url 'inventory_adjustment' %}" {% if '/inventario' in request.path %}aria-current="page"{% endif %}>
-                Ajustes de Inventario
-            </a>
-            </li>
-            <li>
-            <a href="{% url 'purchase_ingredients' %}" {% if '/inventario' in request.path %}aria-current="page"{% endif %}>
-                Compras de Ingredientes
-            </a>
-            </li>
-            <li>
-            <a href="{% url 'export_orders_csv' %}" {% if '/exportar' in request.path %}aria-current="page"{% endif %}>
-                Exportar CSV
-            </a>
-            </li>
-        </ul>
-        </nav>
-    </header>
-    {% block body %} {% endblock %}
-    <script src="//unpkg.com/alpinejs" defer></script>
+<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+  <header class="container">
+    <nav>
+      <ul>
+        <li><strong>{{request.user.groups.all.0.name}}: {{request.user}}</strong></li>
+        <!-- Sección principal -->
+        <li>
+          <a href="{% url 'table_list' %}" {% if request.path == '/' %}aria-current="page"{% endif %}>
+            Mesas
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'order_history' %}" {% if '/historial' in request.path %}aria-current="page"{% endif %}>
+            Historial
+          </a>
+        </li>
+
+        <!-- Inventario -->
+        <li>
+          <a href="{% url 'inventory_movement' %}" {% if '/inventario' in request.path %}aria-current="page"{% endif %}>
+            Movimientos
+          </a>
+        </li>
+        <li>
+          <a href="{% url 'purchase_ingredients' %}" {% if '/compras' in request.path %}aria-current="page"{% endif %}>
+            Compras
+          </a>
+        </li>
+
+        <!-- Reportes -->
+        <li>
+          <details class="dropdown">
+            <summary {% if '/report' in request.path or '/reporte' in request.path %}aria-current="page"{% endif %}>
+              📊 Reportes
+            </summary>
+            <ul dir="rtl">
+              <li><a href="{% url 'report_orders' %}">Reporte de Ventas</a></li>
+              <li><a href="{% url 'report_movements' %}">Reporte de Ajustes</a></li>
+            </ul>
+          </details>
+        </li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Mensajes -->
+  {% if messages %}
+  <section class="container">
+    {% for message in messages %}
+      <blockquote class="messages__{{ message.tags }}">
+        {{ message }}
+      </blockquote>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <!-- Contenido dinámico -->
+  <main class="container">
+    {% block body %}{% endblock %}
+  </main>
+
+  <!-- AlpineJS -->
+  <script src="//unpkg.com/alpinejs" defer></script>
+  <script>
+    if (window.history.replaceState) {
+        window.history.replaceState(null, null, window.location.href);
+    }
+  </script>
 </body>
 </html>

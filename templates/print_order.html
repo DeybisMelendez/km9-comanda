@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imprimir Comanda #{{order.id}}</title>
+</head>
+<body>
+    <h3>Comanda {{ order.id }}</h3>
+    <h3>Mesa {{ order.table.name }}</h3>
+    <p>Fecha: {{ order.created_at|date:"d/m/Y H:i" }}</p>
+    <p>Mesero: {{order.user}}</p>
+    <p>---</p>
+    {% for item in items %}
+    <p><b>{{ item.quantity }} x {{ item.product.name }}</b></p>
+    {% endfor %}
+    <p>---</p>
+    <br><br><br>
+    <style>
+        h3 {
+            font-size: 14px;
+        }
+        p {
+            font-size: 11px;
+        }
+    </style>
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>

@@ -56,16 +56,42 @@
     </table>
     <!-- Resumen de productos -->
   <h2>Resumen de Productos</h2>
-  <template x-for="(product, id) in products" :key="id">
-    <div x-show="product.qty > 0" class="card">
-      <span x-text="`${product.name} - ${product.qty} x C$ ${product.price} = C$ ${product.qty * product.price}`"></span>
-    </div>
-  </template>
-  <strong>Total: C$ <span x-text="Object.values(products).reduce((sum, p) => sum + p.qty * p.price, 0)"></span></strong>
-
+  <table>
+    <tr>
+      <th>Producto</th>
+      <th>Cantidad</th>
+      <th>Precio</th>
+      <th>Monto</th>
+    </tr>
+    <template x-for="(product, id) in products" :key="id">
+      <tr x-show="product.qty > 0" class="card">
+        <td x-text="`${product.name}`"></td>
+        <td x-text="`${product.qty}`"></td>
+        <td x-text="`C$ ${product.price}`"></td>
+        <td x-text="`C$ ${product.qty * product.price}`"></td>
+      </tr>
+    </template>
+    <tr>
+      <td colspan="3">Total:</td>
+      <td>C$ <span x-text="Object.values(products).reduce((sum, p) => sum + p.qty * p.price, 0)"></span></td>
+    </tr>
+  </table>
+  
     <button type="submit">Crear Comanda</button>
   </form>
-  
+{% if order %}
+  <div 
+    x-data="{
+        comandaHtml: '',
+        async init() {
+            const response = await fetch('{% url "print_order" order.id %}');
+            this.comandaHtml = await response.text();
+        }
+    }"
+>
+    <iframe :srcdoc="comandaHtml" frameborder="0" style="display: none"></iframe>
+</div>
+{% endif %}
 
 </main>
 {% endblock %}

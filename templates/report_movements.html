@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+{% block title %}Reporte de Ajustes de Inventario{% endblock %}
+{% block body %}
+<main class="container">
+  <h1>Reporte de Ajustes de Inventario</h1>
+  <form method="get">
+    <div class="grid">
+        <div>
+            <label>Desde:</label>
+            <input type="datetime-local" name="start" value="{{ start|date:'Y-m-d\\TH:i' }}">
+        </div>
+        <div>
+            <label>Hasta:</label>
+            <input type="datetime-local" name="end" value="{{ end|date:'Y-m-d\\TH:i' }}">
+        </div>
+    </div>
+    <button type="submit">Filtrar</button>
+  </form>
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>U/M</th>
+        <th>Ingrediente</th>
+        <th>Razón</th>
+        <th>Cantidad</th>
+        <th>Usuario</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mov in movements %}
+      <tr>
+        <td>{{ mov.created_at|date:"d/m/Y H:i" }}</td>
+        <td>{{ mov.ingredient.unit }}</td>
+        <td>{{ mov.ingredient.name }}</td>
+        <td>{{ mov.reason }}</td>
+        <td>{{ mov.quantity }}</td>
+        <td>{{ mov.user }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'export_movements_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
+</main>
+{% endblock %}

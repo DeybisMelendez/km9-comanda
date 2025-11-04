@@ -8,9 +8,16 @@ urlpatterns = [
     path("mesa/<int:table_id>/nueva/", views.create_order, name="create_order"),
     path("orden/<int:order_id>/", views.order_detail, name="order_detail"),
     path("orden/<int:order_id>/editar/", views.edit_order, name="edit_order"),
+    path("orden/<int:order_id>/imprimir/", views.print_order, name="print_order"),
     path("historial/", views.order_history, name="order_history"),
     path("reporte/", views.daily_report, name="daily_report"),
-    path("inventario/ajustes/", views.inventory_adjustment, name="inventory_adjustment"),
-    path("inventario/compras/", views.purchase_ingredients, name="purchase_ingredients"),
-    path("exportar/csv/", views.export_orders_csv, name="export_orders_csv"),
+    path("ingredientes/movimientos/", views.inventory_movement, name="inventory_movement"),
+    path("ingredientes/compras/", views.purchase_ingredients, name="purchase_ingredients"),
+    # Reportes con filtro de fecha
+    path("reportes/comandas/", views.report_orders, name="report_orders"),
+    path("reportes/movimiento-ingredientes/", views.report_movements, name="report_movements"),
+
+    # Descargas CSV
+    path("reportes/comandas/csv/", views.export_orders_csv, name="export_orders_csv"),
+    path("reportes/movimiento-ingredientes/csv/", views.export_movements_csv, name="export_movements_csv"),
 ]

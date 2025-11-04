@@ -49,11 +49,6 @@ class Ingredient(models.Model):
         self.stock_quantity += Decimal(amount)
         self.save()
 
-    def reduce_stock(self, amount):
-        """Reduce cantidad del stock."""
-        self.stock_quantity -= Decimal(amount)
-        self.save()
-
     def __str__(self):
         return f"{self.name} ({self.stock_quantity} {self.unit})"
 
@@ -69,39 +64,28 @@ class ProductIngredient(models.Model):
         return f"{self.quantity} {self.ingredient.unit} de {self.ingredient.name} para {self.product.name}"
 
 
-class IngredientUsage(models.Model):
-    """Registro histórico de ingredientes usados por cada ítem de pedido."""
+class IngredientMovement(models.Model):
+    """Registra todo movimiento de inventario (uso, compra, ajuste, etc.)"""
 
-    order_item = models.ForeignKey("OrderItem", on_delete=models.CASCADE)
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
-    quantity_used = models.DecimalField(max_digits=10, decimal_places=2)
-    unit = models.CharField(max_length=10, choices=Ingredient.UNITS)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.quantity_used} {self.unit} de {self.ingredient.name} en {self.order_item}"
-
-
-class IngredientStockAdjustment(models.Model):
-    """Ajustes manuales de inventario."""
-
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey("Ingredient", on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
     reason = models.CharField(max_length=255, blank=True, null=True)
-    adjusted_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey("auth.User", on_delete=models.SET_NULL, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def apply_adjustment(self):
-        """Aplica el ajuste al stock."""
+    def apply_movement(self):
+        """Aplica el movimiento al inventario."""
         self.ingredient.add_stock(self.quantity)
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)
         if is_new:
-            self.apply_adjustment()
+            self.apply_movement()
 
     def __str__(self):
-        return f"{self.quantity} {self.ingredient.unit} de {self.ingredient.name} - {self.adjusted_at.date()}"
+        tipo = "Ingreso" if self.quantity >= 0 else "Salida"
+        return f"{tipo}: {self.quantity} {self.ingredient.unit} de {self.ingredient.name}"
 
 
 class Order(models.Model):
@@ -134,14 +118,14 @@ class OrderItem(models.Model):
 
         for prod_ing in ProductIngredient.objects.filter(product=self.product):
             total_required = prod_ing.quantity * Decimal(self.quantity)
-            prod_ing.ingredient.reduce_stock(total_required)
 
-            IngredientUsage.objects.create(
-                order_item=self,
+            IngredientMovement.objects.create(
                 ingredient=prod_ing.ingredient,
-                quantity_used=total_required,
-                unit=prod_ing.ingredient.unit,
+                quantity=-total_required,
+                user=self.order.user,
+                reason=f"Uso en {self.product.name}, Comanda #{self.order.id}",
             )
 
+
     def __str__(self):
-        return f"{self.quantity} x {self.product.name} (Orden {self.order.id})"
+        return f"{self.quantity} x {self.product.name} (Comanda #{self.order.id})"
