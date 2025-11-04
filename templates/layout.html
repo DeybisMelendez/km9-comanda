@@ -1,4 +1,5 @@
 {% load static %}
+{% load user_extras %}
 {% load django_htmx %}
 <!DOCTYPE html>
 <html lang="es">
@@ -11,7 +12,7 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>{% block title %}Panel de Comandas{% endblock %}</title>
-    {% htmx_script %}
+  {% htmx_script %}
   <!-- PicoCSS -->
   <link
     rel="stylesheet"
@@ -20,50 +21,79 @@
   <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
 <body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+  {% if user.is_authenticated %}
   <header class="container">
     <nav>
       <ul>
-        <li><strong>{{request.user.groups.all.0.name}}: {{request.user}}</strong></li>
         <!-- Sección principal -->
         <li>
-          <a href="{% url 'table_list' %}" {% if request.path == '/' %}aria-current="page"{% endif %}>
+          <a href="{% url 'table_list' %}">
             Mesas
           </a>
         </li>
         <li>
-          <a href="{% url 'order_history' %}" {% if '/historial' in request.path %}aria-current="page"{% endif %}>
+          <a href="{% url 'order_history' %}">
             Historial
           </a>
         </li>
-
+        {% if user|is_encargado or user|is_admin %}
         <!-- Inventario -->
         <li>
-          <a href="{% url 'inventory_movement' %}" {% if '/inventario' in request.path %}aria-current="page"{% endif %}>
-            Movimientos
-          </a>
+          <details class="dropdown">
+            <summary>
+              Inventario
+            </summary>
+            <ul>
+              <li>
+                <a href="{% url 'inventory_movement' %}">
+                  Movimientos
+                </a>
+              </li>
+              <li>
+                <a href="{% url 'purchase_ingredients' %}">
+                  Compras
+                </a>
+              </li>
+            </ul>
+          </details>
         </li>
-        <li>
-          <a href="{% url 'purchase_ingredients' %}" {% if '/compras' in request.path %}aria-current="page"{% endif %}>
-            Compras
-          </a>
-        </li>
-
         <!-- Reportes -->
         <li>
           <details class="dropdown">
-            <summary {% if '/report' in request.path or '/reporte' in request.path %}aria-current="page"{% endif %}>
-              📊 Reportes
+            <summary>
+              Reportes
             </summary>
-            <ul dir="rtl">
-              <li><a href="{% url 'report_orders' %}">Reporte de Ventas</a></li>
-              <li><a href="{% url 'report_movements' %}">Reporte de Ajustes</a></li>
+            <ul>
+              <li>
+                <a href="{% url 'report_orders' %}">
+                  Ventas
+                </a>
+              </li>
+              <li>
+                <a href="{% url 'report_movements' %}">
+                  Ajustes
+                </a>
+              </li>
             </ul>
           </details>
+        </li>
+        {% endif %}
+        {% if user.is_staff %}
+          <li><a href="/admin/">Admin</a></li>
+        {% endif %}
+      </ul>
+      <ul>
+        <li><strong>{{user|get_group}}: {{request.user}}</strong></li>
+        <li>
+          <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button role="button" type="submit">Logout</button>
+          </form>
         </li>
       </ul>
     </nav>
   </header>
-
+  {% endif %}
   <!-- Mensajes -->
   {% if messages %}
   <section class="container">
