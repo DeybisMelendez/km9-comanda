@@ -4,7 +4,7 @@
 {% block body %}
 <main class="container">
   <h1>Comanda #{{ order.id }} - Mesa {{ order.table.name }}</h1>
-  {% if user|is_encargado or user|is_admin %}
+  {% if user|is_encargado %}
     <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
   {% endif %}
   <p>Fecha de creación: {{ order.created_at|date:"d/m/Y H:i" }}</p>

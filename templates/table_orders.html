@@ -17,7 +17,7 @@
         </ul>
         <p><strong>Total:</strong> C$ {{ order.get_total|floatformat:2 }}</p>
         <footer>
-          {% if user|is_encargado or user|is_admin %}
+          {% if user|is_encargado %}
           <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
         {% endif %}
         </footer>

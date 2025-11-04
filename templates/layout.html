@@ -1,6 +1,5 @@
 {% load static %}
 {% load user_extras %}
-{% load django_htmx %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,7 +11,6 @@
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>{% block title %}Panel de Comandas{% endblock %}</title>
-  {% htmx_script %}
   <!-- PicoCSS -->
   <link
     rel="stylesheet"
@@ -20,7 +18,7 @@
   >
   <link rel="stylesheet" href="{% static 'styles.css' %}">
 </head>
-<body hx-headers='{"x-csrftoken": "{{ csrf_token }}"}'>
+<body>
   {% if user.is_authenticated %}
   <header class="container">
     <nav>
@@ -36,7 +34,7 @@
             Historial
           </a>
         </li>
-        {% if user|is_encargado or user|is_admin %}
+        {% if user|is_encargado %}
         <!-- Inventario -->
         <li>
           <details class="dropdown">

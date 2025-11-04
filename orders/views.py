@@ -16,7 +16,10 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, F
 from .models import Table, Order, OrderItem
+from django.contrib.auth.decorators import user_passes_test
 
+def is_encargado(user):
+    return user.groups.filter(name='Encargado').exists()
 
 @login_required
 def table_list(request):
@@ -124,6 +127,7 @@ def order_detail(request, order_id):
     })
 
 @login_required
+@user_passes_test(is_encargado)
 def edit_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     tables = Table.objects.all().order_by("name")
@@ -181,6 +185,7 @@ def order_history(request):
 # 5. Reporte de Ventas del Día
 # -------------------------
 @login_required
+@user_passes_test(is_encargado)
 def daily_report(request):
     days_ago = int(request.GET.get("days_ago", 0))
     target_date = timezone.now().date() - timedelta(days=days_ago)
@@ -225,6 +230,7 @@ def daily_report(request):
 # 6. Ajustes / Compras de Inventario
 # -------------------------
 @login_required
+@user_passes_test(is_encargado)
 def inventory_movement(request):
     ingredients = Ingredient.objects.all().order_by("name")
 
@@ -254,6 +260,7 @@ def inventory_movement(request):
     return render(request, "inventory.html", {"ingredients": ingredients})
 
 @login_required
+@user_passes_test(is_encargado)
 def purchase_ingredients(request):
     ingredients = Ingredient.objects.all().order_by("name")
 
@@ -305,6 +312,7 @@ def parse_date_range(request):
     return start, end
 
 @login_required
+@user_passes_test(is_encargado)
 def report_orders(request):
     start, end = parse_date_range(request)
     order_items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
@@ -319,6 +327,7 @@ def report_orders(request):
 
 
 @login_required
+@user_passes_test(is_encargado)
 def export_orders_csv(request):
     start, end = parse_date_range(request)
     order_items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
@@ -346,6 +355,7 @@ def export_orders_csv(request):
     return response
 
 @login_required
+@user_passes_test(is_encargado)
 def report_movements(request):
     start, end = parse_date_range(request)
     movements = IngredientMovement.objects.filter(created_at__range=(start, end)).select_related("ingredient")
@@ -358,6 +368,7 @@ def report_movements(request):
 
 
 @login_required
+@user_passes_test(is_encargado)
 def export_movements_csv(request):
     start, end = parse_date_range(request)
     movements = IngredientMovement.objects.filter(created_at__range=(start, end)).select_related("ingredient")
