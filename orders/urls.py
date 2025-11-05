@@ -16,8 +16,9 @@ urlpatterns = [
     # Reportes con filtro de fecha
     path("reportes/comandas/", views.report_orders, name="report_orders"),
     path("reportes/movimiento-ingredientes/", views.report_movements, name="report_movements"),
-
+    path("reportes/saldo-ingredientes/", views.report_inventory, name="report_inventory"),
     # Descargas CSV
     path("reportes/comandas/csv/", views.export_orders_csv, name="export_orders_csv"),
     path("reportes/movimiento-ingredientes/csv/", views.export_movements_csv, name="export_movements_csv"),
+    path("report/saldo-ingredientes/csv/", views.export_inventory_csv, name="export_inventory_csv"),
 ]

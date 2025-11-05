@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block body %}
+<main class="container">
+  <header>
+    <h2>📦 Reporte de Inventario</h2>
+    <p>Visualiza el estado actual de los ingredientes en inventario.</p>
+  </header>
+
+  <section>
+      <p><strong>Total de ingredientes:</strong> {{ total_items }}</p>
+      <a href="{% url 'export_inventory_csv' %}" role="button">
+        ⬇️ Descargar CSV
+      </a>
+  </section>
+
+  <article>
+    <table>
+      <thead>
+        <tr>
+          
+          <th>Ingrediente</th>
+          <th>Cantidad actual</th>
+          <th>Unidad</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in ingredients %}
+        <tr>
+            
+          <td>{{ i.name }}</td>
+          
+          <td>{{ i.stock_quantity }}</td>
+          <td>{{ i.unit|default:"—" }}</td>
+          
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" style="text-align:center;">No hay ingredientes registrados.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </article>
+</main>
+{% endblock %}

@@ -29,10 +29,13 @@
         <td>C$ {{ item.get_total }}</td>
       </tr>
       {% endfor %}
+      <tr>
+        <th colspan="3">Total</th>
+        <th>C$ {{ total }}</th>
+      </tr>
     </tbody>
   </table>
 
-  <p><strong>Total: C$ {{ total }}</strong></p>
   <div 
     x-data="{
         comandaHtml: '',

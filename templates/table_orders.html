@@ -8,19 +8,35 @@
   {% if orders %}
     {% for order in orders %}
       <article>
-        <h3>Comanda #{{ order.id }} - {{ order.get_status_display }}</h3>
-        <p>Mesero: {{ order.user.username }}</p>
-        <ul>
+          <h3>Comanda #{{ order.id }}</h3>
+          <p>Mesero: {{ order.user.username }}</p>
+          <p>Fecha: {{ order.created_at }}</p>
+          <hr>
+        <table>
+          <tr>
+            <th>Cantidad</th>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Monto</th>
+          </tr>
           {% for item in order.orderitem_set.all %}
-            <li>{{ item.quantity }} x {{ item.product.name }} — C$ {{ item.get_total|floatformat:2 }}</li>
+            <tr>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.product.name }}</td>
+              <td>{{ item.product.price}}</td>
+              <td>C$ {{ item.get_total|floatformat:2 }}</td>
+            </tr>
           {% endfor %}
-        </ul>
-        <p><strong>Total:</strong> C$ {{ order.get_total|floatformat:2 }}</p>
+          <tr>
+            <th colspan="3">Total</th>
+            <th>C$ {{ order.get_total|floatformat:2 }}</th>
+          </tr>
+        </table>
+        {% if user|is_encargado %}
         <footer>
-          {% if user|is_encargado %}
           <a href="{% url 'edit_order' order.id %}" role="button">✏️ Editar Comanda</a>
-        {% endif %}
         </footer>
+        {% endif %}
       </article>
     {% endfor %}
   {% else %}

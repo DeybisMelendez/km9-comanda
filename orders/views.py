@@ -6,7 +6,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.db import transaction
 from decimal import Decimal
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import csv
 from .models import (
     Table, Product, ProductCategory,Order, OrderItem,
@@ -162,7 +162,7 @@ def order_history(request):
     days_ago = int(request.GET.get("days_ago", 0))
 
     # Calcular la fecha objetivo
-    target_date = timezone.now().date() - timedelta(days=days_ago)
+    target_date = datetime.now() - timedelta(days=days_ago)
 
     # Filtrar comandas por fecha específica
     orders = Order.objects.filter(created_at__date=target_date).order_by("-created_at")
@@ -245,14 +245,14 @@ def inventory_movement(request):
 
                 found_qty = Decimal(found_qty_str)
                 diff = found_qty - ingredient.stock_quantity
-
+                note = request.POST.get("note", "").strip()
                 # Si hay diferencia, generamos ajuste
                 if diff != 0:
                     IngredientMovement.objects.create(
                         ingredient=ingredient,
                         quantity=diff,
                         user=request.user,
-                        reason=f"Ajuste por inventario físico (hecho por {request.user.username})",
+                        reason="Ajuste por inventario físico. " + note,
                     )
 
             messages.success(request, "✅ Ajustes de inventario aplicados correctamente.")
@@ -306,9 +306,9 @@ def parse_date_range(request):
         end = datetime.strptime(end_str, date_format)
     else:
         # Por defecto, día actual completo
-        today = timezone.now().date()
-        start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
-        end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+        today = datetime.today().date()
+        start = datetime.combine(today, time.min)
+        end = datetime.combine(today, time.max)
     return start, end
 
 @login_required
@@ -335,7 +335,7 @@ def export_orders_csv(request):
     )
 
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="reporte_comandas.csv"'
+    response["Content-Disposition"] = f'attachment; filename="reporte_comandas_{datetime.now()}.csv"'
 
     writer = csv.writer(response)
     writer.writerow(["Fecha y hora", "No de Comanda", "Mesero", "Mesa", "Cantidad", "Producto", "Precio", "Monto"])
@@ -374,7 +374,7 @@ def export_movements_csv(request):
     movements = IngredientMovement.objects.filter(created_at__range=(start, end)).select_related("ingredient")
 
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = 'attachment; filename="reporte_ajustes.csv"'
+    response["Content-Disposition"] = f'attachment; filename="reporte_ajustes_{datetime.now()}.csv"'
 
     writer = csv.writer(response)
     writer.writerow(["Fecha y hora", "Valor del ajuste", "Ingrediente", "Razón", "Usuario"])
@@ -386,6 +386,41 @@ def export_movements_csv(request):
             mov.ingredient.name,
             mov.reason or "—",
             mov.user.username if mov.user else "—",
+        ])
+
+    return response
+
+@login_required
+@user_passes_test(is_encargado)
+def report_inventory(request):
+    """Vista para ver los saldos actuales de inventario."""
+    ingredients = Ingredient.objects.all().order_by("name")
+
+    total_items = ingredients.count()
+
+    context = {
+        "ingredients": ingredients,
+        "total_items": total_items,
+    }
+    return render(request, "report_inventory.html", context)
+
+@login_required
+@user_passes_test(is_encargado)
+def export_inventory_csv(request):
+    """Exporta el estado actual del inventario a un archivo CSV."""
+    ingredients = Ingredient.objects.all().order_by("name")
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="reporte_inventario_{datetime.now()}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Ingrediente", "Cantidad actual", "Unidad", "Último movimiento"])
+
+    for i in ingredients:
+        writer.writerow([
+            i.name,
+            i.stock_quantity,
+            getattr(i, "unit", "—"),
         ])
 
     return response
