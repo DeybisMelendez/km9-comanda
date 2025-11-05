@@ -3,6 +3,7 @@
 {% block body %}
 <main class="container">
   <h1>📊 Reporte de Comandas</h1>
+    <a href="{% url 'export_orders_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
 
   <form method="get">
     <div class="grid">
@@ -21,7 +22,8 @@
   <hr>
 
   {% if order_items %}
-  <table>
+  <div class="overflow-auto">
+    <table class="striped">
     <thead>
       <tr>
         <th>Fecha y hora</th>
@@ -49,9 +51,9 @@
       {% endfor %}
     </tbody>
   </table>
+  </div>
   {% else %}
   <p>No hay registros en este rango de fechas.</p>
   {% endif %}
-    <a href="{% url 'export_orders_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
 </main>
 {% endblock %}

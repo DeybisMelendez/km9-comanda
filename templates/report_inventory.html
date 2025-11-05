@@ -1,20 +1,14 @@
 {% extends "layout.html" %}
 {% block body %}
 <main class="container">
-  <header>
-    <h2>📦 Reporte de Inventario</h2>
-    <p>Visualiza el estado actual de los ingredientes en inventario.</p>
-  </header>
-
-  <section>
+<h1>📦 Reporte de Inventario</h1>
       <p><strong>Total de ingredientes:</strong> {{ total_items }}</p>
       <a href="{% url 'export_inventory_csv' %}" role="button">
         ⬇️ Descargar CSV
       </a>
-  </section>
 
-  <article>
-    <table>
+  <div class="class="overflow-auto"">
+    <table class="striped">
       <thead>
         <tr>
           
@@ -41,6 +35,6 @@
         {% endfor %}
       </tbody>
     </table>
-  </article>
+</div>
 </main>
 {% endblock %}

@@ -3,6 +3,7 @@
 {% block body %}
 <main class="container">
   <h1>Reporte de Ajustes de Inventario</h1>
+  <a href="{% url 'export_movements_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
   <form method="get">
     <div class="grid">
         <div>
@@ -16,7 +17,8 @@
     </div>
     <button type="submit">Filtrar</button>
   </form>
-  <table>
+  <div class="overflow-auto">
+    <table class="striped">
     <thead>
       <tr>
         <th>Fecha</th>
@@ -40,6 +42,6 @@
       {% endfor %}
     </tbody>
   </table>
-  <a href="{% url 'export_movements_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
+  </div>
 </main>
 {% endblock %}
