@@ -45,11 +45,15 @@
           <td>{{ product.name }}</td>
           <td>C$ {{ product.price }}</td>
           <td>
-            <input type="number" 
-              name="product_{{ product.id }}" 
-              min="0" 
-              x-model.number="products[{{ product.id }}].qty">
-          </td>
+            <fieldset role="group">
+              <button role="button" @click.prevent="products[{{ product.id }}].qty++">+</button>
+              <input type="number" 
+                name="product_{{ product.id }}" 
+                min="0" 
+                x-model.number="products[{{ product.id }}].qty">
+              <button role="button" @click.prevent="products[{{ product.id }}].qty > 0 ? products[{{ product.id }}].qty-- : ''">-</button>
+            </fieldset>
+            </td>
         </tr>
         {% endfor %}
       </tbody>
