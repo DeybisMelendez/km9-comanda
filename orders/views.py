@@ -1,22 +1,19 @@
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
+import csv
+from datetime import datetime, time, timedelta
+from decimal import Decimal
+
 from django.contrib import messages
-from django.http import HttpResponse
-from django.utils import timezone
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.db import transaction
-from decimal import Decimal
-from datetime import datetime, timedelta, time
-import csv
-from .models import (
-    Table, Product, ProductCategory,Order, OrderItem,
-    Ingredient, IngredientMovement
-)
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, F
-from .models import Table, Order, OrderItem
-from django.contrib.auth.decorators import user_passes_test
+from django.db.models import F, Sum
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
+
+from .models import (Ingredient, IngredientMovement, Order, OrderItem, Product,
+                     ProductCategory, Table)
+
 
 def is_encargado(user):
     return user.groups.filter(name='Encargado').exists()
