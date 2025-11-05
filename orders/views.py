@@ -23,7 +23,6 @@ def table_list(request):
     tables = Table.objects.all().order_by("name")
     table_data = []
     for table in tables:
-        # Total de órdenes pendientes o servidas
         total_due = (
             Order.objects.filter(table=table, is_paid=False)
             .annotate(order_total=Sum(F("orderitem__quantity") * F("orderitem__product__price")))
@@ -58,10 +57,6 @@ def mark_table_paid(request, table_id):
     messages.success(request, f"Comandas de la mesa {table.name} marcada como pagada.")
     return redirect("table_list")
 
-
-# -------------------------
-# 2. Crear Comanda
-# -------------------------
 @login_required
 def print_order(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -100,10 +95,6 @@ def create_order(request, table_id):
         "categories": categories,
     })
 
-
-# -------------------------
-# 3. Detalle / Modificar Comanda
-# -------------------------
 @login_required
 def order_detail(request, order_id):
     order = get_object_or_404(Order, id=order_id)
@@ -149,22 +140,11 @@ def edit_order(request, order_id):
         {"order": order, "tables": tables, "users": users},
     )
 
-
-# -------------------------
-# 4. Historial de Comandas
-# -------------------------
 @login_required
 def order_history(request):
-    # Obtener parámetro GET days_ago (por defecto 0)
     days_ago = int(request.GET.get("days_ago", 0))
-
-    # Calcular la fecha objetivo
     target_date = datetime.now() - timedelta(days=days_ago)
-
-    # Filtrar comandas por fecha específica
     orders = Order.objects.filter(created_at__date=target_date).order_by("-created_at")
-
-    # Calcular días anterior y siguiente (limitando el siguiente a 0 = hoy)
     prev_days_ago = days_ago + 1
     next_days_ago = max(days_ago - 1, 0)
 
@@ -178,22 +158,17 @@ def order_history(request):
 
     return render(request, "order_history.html", context)
 
-# -------------------------
-# 5. Reporte de Ventas del Día
-# -------------------------
 @login_required
 @user_passes_test(is_encargado)
 def daily_report(request):
     days_ago = int(request.GET.get("days_ago", 0))
     target_date = timezone.now().date() - timedelta(days=days_ago)
 
-    # Filtrar órdenes pagadas
     orders = Order.objects.filter(
         created_at__date=target_date,
         is_paid=True
     ).order_by("-created_at")
 
-    # Totales y resumen por producto (cantidad y subtotal)
     product_summary = {}
     total_sales = 0
     for order in orders:
@@ -223,16 +198,12 @@ def daily_report(request):
 
     return render(request, "daily_report.html", context)
 
-# -------------------------
-# 6. Ajustes / Compras de Inventario
-# -------------------------
 @login_required
 @user_passes_test(is_encargado)
 def inventory_movement(request):
     ingredients = Ingredient.objects.all().order_by("name")
 
     if request.method == "POST":
-        # Usamos una transacción para asegurar consistencia
         with transaction.atomic():
             for ingredient in ingredients:
                 field_name = f"found_{ingredient.id}"
@@ -243,7 +214,6 @@ def inventory_movement(request):
                 found_qty = Decimal(found_qty_str)
                 diff = found_qty - ingredient.stock_quantity
                 note = request.POST.get("note", "").strip()
-                # Si hay diferencia, generamos ajuste
                 if diff != 0:
                     IngredientMovement.objects.create(
                         ingredient=ingredient,
@@ -273,7 +243,6 @@ def purchase_ingredients(request):
 
                 qty = Decimal(qty_str)
                 if qty <= 0:
-                    # No permitir negativos o cero
                     continue
                 IngredientMovement.objects.create(
                     ingredient=ingredient,
@@ -302,7 +271,6 @@ def parse_date_range(request):
         start = datetime.strptime(start_str, date_format)
         end = datetime.strptime(end_str, date_format)
     else:
-        # Por defecto, día actual completo
         today = datetime.today().date()
         start = datetime.combine(today, time.min)
         end = datetime.combine(today, time.max)
