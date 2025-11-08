@@ -1,7 +1,8 @@
 {% extends 'layout.html' %}
+{% load humanize %}
 {% block body %}
 <main class="container" x-data>
-  <h1>🛒 Registrar Compras de Ingredientes</h1>
+  <h1>🛒 Registrar Ingreso de Ingredientes</h1>
   <p>Indica la cantidad de cada ingrediente que deseas agregar al inventario.</p>
 
   <form method="post">
@@ -20,7 +21,7 @@
         <tr>
           <td>{{ ing.name }}</td>
           <td>{{ ing.unit }}</td>
-          <td>{{ ing.stock_quantity }}</td>
+          <td>{{ ing.stock_quantity|floatformat:2|intcomma }}</td>
           <td>
             <input
               type="number"

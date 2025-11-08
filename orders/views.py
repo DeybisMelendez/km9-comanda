@@ -48,12 +48,11 @@ def table_list(request):
     """Muestra todas las mesas y su total pendiente."""
     tables = Table.objects.all().order_by("name")
     table_data = []
-
     for table in tables:
         total_due = (
             Order.objects.filter(table=table, is_paid=False)
-            .annotate(total=Sum(F("orderitem__quantity") * F("orderitem__product__price")))
-            .aggregate(total=Sum("total"))["total"]
+            .annotate(order_total=Sum(F("orderitem__quantity") * F("orderitem__product__price")))
+            .aggregate(total=Sum("order_total"))["total"]
             or 0
         )
         table_data.append({"table": table, "total_due": total_due})
@@ -326,10 +325,18 @@ def export_inventory_csv(request):
 def report_orders(request):
     """Reporte de comandas por rango de fechas."""
     start, end = parse_date_range(request)
-    items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
-        "order", "product", "order__table", "order__user"
-    )
-    return render(request, "report_orders.html", {"order_items": items, "start": start, "end": end})
+    table = request.GET.get("table", None)
+    items = None
+    if table:
+        items = OrderItem.objects.filter(order__created_at__range=(start, end), order__table=table).select_related(
+            "order", "product", "order__table", "order__user"
+        )
+    else:
+        items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
+            "order", "product", "order__table", "order__user"
+        )
+    tables = Table.objects.all()
+    return render(request, "report_orders.html", {"order_items": items, "start": start, "end": end, "tables": tables, "table": table})
 
 
 @login_required
@@ -337,9 +344,16 @@ def report_orders(request):
 def export_orders_csv(request):
     """Exporta las comandas a CSV."""
     start, end = parse_date_range(request)
-    items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
-        "order", "product", "order__table", "order__user"
-    )
+    table = request.GET.get("table")
+    items = None
+    if table:
+        items = OrderItem.objects.filter(order__created_at__range=(start, end), order__table=table).select_related(
+            "order", "product", "order__table", "order__user"
+        )
+    else:
+        items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
+            "order", "product", "order__table", "order__user"
+        )
 
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="comandas_{datetime.now():%Y%m%d_%H%M}.csv"'
@@ -386,4 +400,62 @@ def export_movements_csv(request):
             m.reason or "—",
             m.user.username if m.user else "—",
         ])
+    return response
+
+@login_required
+@user_passes_test(is_encargado)
+def sales_report_by_product(request):
+    """Reporte de ventas por producto (filtrable por fecha)."""
+    start, end = parse_date_range(request)
+
+    # Filtramos solo órdenes pagadas en el rango seleccionado
+    items = (
+        OrderItem.objects.filter(order__is_paid=True, order__created_at__range=(start, end))
+        .select_related("product")
+        .values("product__name")
+        .annotate(
+            total_qty=Sum("quantity"),
+            total_sales=Sum(F("quantity") * F("product__price")),
+            price=F("product__price"),
+        )
+        .order_by("-total_sales")
+    )
+
+    # Total general del rango
+    total_sales = sum((i["total_sales"] or 0) for i in items)
+
+    context = {
+        "items": items,
+        "total_sales": total_sales,
+        "start": start,
+        "end": end,
+    }
+
+    return render(request, "sales_report_by_product.html", context)
+
+@login_required
+@user_passes_test(is_encargado)
+def export_sales_by_product_csv(request):
+    """Exporta el reporte de ventas por producto a CSV."""
+    start, end = parse_date_range(request)
+    items = (
+        OrderItem.objects.filter(order__is_paid=True, order__created_at__range=(start, end))
+        .select_related("product")
+        .values("product__name")
+        .annotate(
+            total_qty=Sum("quantity"),
+            total_sales=Sum(F("quantity") * F("product__price")),
+            price=F("product__price"),
+        )
+        .order_by("-total_sales")
+    )
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="ventas_por_producto_{datetime.now():%Y%m%d_%H%M}.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(["Producto", "Precio Unitario", "Cantidad", "Total"])
+    for i in items:
+        writer.writerow([i["product__name"], i["price"], i["total_qty"], i["total_sales"]])
+
     return response

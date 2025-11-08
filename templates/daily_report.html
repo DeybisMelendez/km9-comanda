@@ -38,16 +38,16 @@
         {% for name, data in product_summary.items %}
         <tr>
           <td>{{ name }}</td>
-          <td>C$ {{ data.price }}</td>
-          <td>{{ data.qty }}</td>
-          <td>C$ {{ data.subtotal }}</td>
+          <td>C$ {{ data.price|floatformat:2|intcomma }}</td>
+          <td>{{ data.qty|floatformat:2|intcomma }}</td>
+          <td>C$ {{ data.subtotal|floatformat:2|intcomma }}</td>
         </tr>
         {% endfor %}
       </tbody>
       <tfoot>
         <tr>
           <th colspan="3">Total del día</th>
-          <th>C$ {{ total_sales }}</th>
+          <th>C$ {{ total_sales|floatformat:2|intcomma }}</th>
         </tr>
       </tfoot>
     </table>

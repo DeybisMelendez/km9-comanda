@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load humanize %}
 {% block title %}Historial de Comandas{% endblock %}
 
 {% block body %}
@@ -26,7 +27,7 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
+          <th>Comanda</th>
           <th>Mesa</th>
           <th>Hora</th>
           <th>Estado</th>
@@ -41,7 +42,7 @@
             <td>{{ order.table.name }}</td>
             <td>{{ order.created_at|date:"H:i" }}</td>
             <td>{{ order.get_status_display }}</td>
-            <td>C$ {{ order.get_total }}</td>
+            <td>C$ {{ order.get_total|floatformat:2|intcomma }}</td>
             <td><a href="{% url 'order_detail' order.id %}">Ver detalle</a></td>
           </tr>
         {% endfor %}

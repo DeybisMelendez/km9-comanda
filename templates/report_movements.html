@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load humanize %}
 {% block title %}Reporte de Ajustes de Inventario{% endblock %}
 {% block body %}
 <main class="container">
@@ -36,7 +37,7 @@
         <td>{{ mov.ingredient.unit }}</td>
         <td>{{ mov.ingredient.name }}</td>
         <td>{{ mov.reason }}</td>
-        <td>{{ mov.quantity }}</td>
+        <td>{{ mov.quantity|intcomma }}</td>
         <td>{{ mov.user }}</td>
       </tr>
       {% endfor %}

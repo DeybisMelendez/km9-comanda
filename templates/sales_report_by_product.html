@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% block body %}
+<main class="container">
+  <h1>Reporte de Ventas por Producto</h1>
+
+  <a href="{% url 'export_sales_by_product_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
+  <form method="get">
+    <div class="grid">
+        <div>
+            <label>Desde:</label>
+            <input type="datetime-local" name="start" value="{{ start|date:'Y-m-d\\TH:i' }}">
+        </div>
+        <div>
+            <label>Hasta:</label>
+            <input type="datetime-local" name="end" value="{{ end|date:'Y-m-d\\TH:i' }}">
+        </div>
+    </div>
+    <button type="submit">Filtrar</button>
+  </form>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Precio Unitario</th>
+          <th>Cantidad Vendida</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in items %}
+        <tr>
+          <td>{{ i.product__name }}</td>
+          <td>C$ {{ i.price|floatformat:2|intcomma }}</td>
+          <td>{{ i.total_qty|intcomma }}</td>
+          <td>C$ {{ i.total_sales|floatformat:2|intcomma }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" style="text-align:center;">Sin ventas registradas</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="3">Total general</th>
+          <th>C$ {{ total_sales|floatformat:2|intcomma }}</th>
+        </tr>
+      </tfoot>
+    </table>
+
+  <p><small>Mostrando ventas pagadas entre {{ start|date:"d/m/Y H:i" }} y {{ end|date:"d/m/Y H:i" }}</small></p>
+</main>
+{% endblock %}

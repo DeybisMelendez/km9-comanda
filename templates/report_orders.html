@@ -1,15 +1,24 @@
 {% extends "layout.html" %}
+{% load humanize %}
 {% block title %}Reporte de Comandas{% endblock %}
 {% block body %}
 <main class="container">
   <h1>📊 Reporte de Comandas</h1>
-    <a href="{% url 'export_orders_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
+  <a href="{% url 'export_orders_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}&table={{table}}" role="button">Descargar CSV</a>
 
   <form method="get">
     <div class="grid">
         <div>
             <label>Desde:</label>
             <input type="datetime-local" name="start" value="{{ start|date:'Y-m-d\\TH:i' }}">
+        </div>
+        <div>
+          <label>Mesa</label>
+          <select name="table">
+            {% for t in tables %}
+              <option value="{{t.id}}" {% if table == t.name %} selected {% endif %}>{{t.name}}</option>
+            {% endfor %}
+          </select>
         </div>
         <div>
             <label>Hasta:</label>
@@ -43,10 +52,10 @@
         <td>{{ item.order.id }}</td>
         <td>{{ item.order.user.username|default:"—" }}</td>
         <td>{{ item.order.table.name|default:"—" }}</td>
-        <td>{{ item.quantity }}</td>
+        <td>{{ item.quantity|intcomma }}</td>
         <td>{{ item.product.name }}</td>
-        <td>C$ {{ item.product.price }}</td>
-        <td>C$ {{ item.get_total }}</td>
+        <td>C$ {{ item.product.price|floatformat:2|intcomma }}</td>
+        <td>C$ {{ item.get_total|floatformat:2|intcomma }}</td>
       </tr>
       {% endfor %}
     </tbody>

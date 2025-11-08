@@ -12,7 +12,7 @@
     <p>Mesero: {{order.user}}</p>
     <p>---</p>
     {% for item in items %}
-    <p><b>{{ item.quantity }} x {{ item.product.name }}</b></p>
+    <p><b>{{ item.quantity|intcomma }} x {{ item.product.name }}</b></p>
     {% endfor %}
     <p>---</p>
     <br><br><br>

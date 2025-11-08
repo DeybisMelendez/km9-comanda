@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load humanize %}
 {% load user_extras %}
 {% block title %}Comandas - Mesa {{ table.name }}{% endblock %}
 {% block body %}
@@ -21,15 +22,15 @@
           </tr>
           {% for item in order.orderitem_set.all %}
             <tr>
-              <td>{{ item.quantity }}</td>
+              <td>{{ item.quantity|floatformat:2|intcomma  }}</td>
               <td>{{ item.product.name }}</td>
-              <td>{{ item.product.price}}</td>
-              <td>C$ {{ item.get_total|floatformat:2 }}</td>
+              <td>C$ {{ item.product.price|floatformat:2|intcomma }}</td>
+              <td>C$ {{ item.get_total|floatformat:2|intcomma  }}</td>
             </tr>
           {% endfor %}
           <tr>
             <th colspan="3">Total</th>
-            <th>C$ {{ order.get_total|floatformat:2 }}</th>
+            <th>C$ {{ order.get_total|floatformat:2|intcomma  }}</th>
           </tr>
         </table>
         {% if user|is_encargado %}

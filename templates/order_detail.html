@@ -1,4 +1,5 @@
 {% extends "layout.html" %}
+{% load humanize %}
 {% load user_extras %}
 {% block title %}Detalle de Comanda{% endblock %}
 {% block body %}
@@ -24,14 +25,14 @@
       {% for item in items %}
       <tr>
         <td>{{ item.product.name }}</td>
-        <td>{{ item.quantity }}</td>
-        <td>C$ {{ item.product.price }}</td>
-        <td>C$ {{ item.get_total }}</td>
+        <td>{{ item.quantity|floatformat:2|intcomma }}</td>
+        <td>C$ {{ item.product.price|floatformat:2|intcomma }}</td>
+        <td>C$ {{ item.get_total|floatformat:2|intcomma }}</td>
       </tr>
       {% endfor %}
       <tr>
         <th colspan="3">Total</th>
-        <th>C$ {{ total }}</th>
+        <th>C$ {{ total|floatformat:2|intcomma }}</th>
       </tr>
     </tbody>
   </table>

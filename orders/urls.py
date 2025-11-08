@@ -17,8 +17,11 @@ urlpatterns = [
     path("reportes/comandas/", views.report_orders, name="report_orders"),
     path("reportes/movimiento-ingredientes/", views.report_movements, name="report_movements"),
     path("reportes/saldo-ingredientes/", views.report_inventory, name="report_inventory"),
+    path("reportes/ventas-producto/", views.sales_report_by_product, name="sales_report_by_product"),
     # Descargas CSV
     path("reportes/comandas/csv/", views.export_orders_csv, name="export_orders_csv"),
     path("reportes/movimiento-ingredientes/csv/", views.export_movements_csv, name="export_movements_csv"),
-    path("report/saldo-ingredientes/csv/", views.export_inventory_csv, name="export_inventory_csv"),
+    path("reportes/saldo-ingredientes/csv/", views.export_inventory_csv, name="export_inventory_csv"),
+    path("reportes/ventas-producto/csv/", views.export_sales_by_product_csv, name="export_sales_by_product_csv"),
+
 ]
