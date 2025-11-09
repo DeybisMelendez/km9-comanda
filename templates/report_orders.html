@@ -60,10 +60,17 @@
       </tr>
       {% endfor %}
     </tbody>
+    <tfoot>
+        <tr>
+          <th colspan="7">Total general</th>
+          <th>C$ {{ total|floatformat:2|intcomma }}</th>
+        </tr>
+      </tfoot>
   </table>
   </div>
   {% else %}
   <p>No hay registros en este rango de fechas.</p>
   {% endif %}
+  <p><small>Mostrando comandas entre {{ start|date:"d/m/Y H:i" }} y {{ end|date:"d/m/Y H:i" }}</small></p>
 </main>
 {% endblock %}
