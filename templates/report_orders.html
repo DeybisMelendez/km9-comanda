@@ -15,6 +15,7 @@
         <div>
           <label>Mesa</label>
           <select name="table">
+            <option value="" {% if table == None %} selected {% endif %}>Todas las mesas</option>
             {% for t in tables %}
               <option value="{{t.id}}" {% if table == t.name %} selected {% endif %}>{{t.name}}</option>
             {% endfor %}
