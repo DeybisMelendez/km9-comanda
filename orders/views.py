@@ -158,7 +158,6 @@ def edit_order(request, order_id):
     return render(request, "edit_order.html", {"order": order, "tables": tables, "users": users})
 
 
-@login_required
 def print_order(request, order_id):
     """Vista de impresión de comanda."""
     order = get_object_or_404(Order, id=order_id)
@@ -346,9 +345,10 @@ def report_orders(request):
         items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
             "order", "product", "order__table", "order__user"
         )
+    total = sum((i.get_total() or 0) for i in items)
     items = items.order_by("-id")
     tables = Table.objects.all()
-    return render(request, "report_orders.html", {"order_items": items, "start": start, "end": end, "tables": tables, "table": table})
+    return render(request, "report_orders.html", {"order_items": items, "start": start, "end": end, "tables": tables, "table": table, "total": total})
 
 
 @login_required

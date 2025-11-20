@@ -49,11 +49,5 @@
     <iframe :srcdoc="comandaHtml" frameborder="0" style="display: none"></iframe>
     <button type="button" @click="printOrder()">🖨️ Imprimir Comanda</button>
   </div>
-  {% if not order.is_paid %}
-  <form method="post">{% csrf_token %}
-    <input type="hidden" name="action" value="mark_paid">
-    <button type="submit" class="contrast">Marcar como pagada</button>
-  </form>
-  {% endif %}
 </main>
 {% endblock %}
