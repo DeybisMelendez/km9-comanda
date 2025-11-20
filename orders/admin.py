@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import (
     Table,
     ProductCategory,
+    DispatchArea,
     Product,
     Ingredient,
     ProductIngredient,
@@ -22,6 +23,11 @@ class ProductCategoryAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
 
+@admin.register(DispatchArea)
+class DispatchAreaAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+
 
 class ProductIngredientInline(admin.TabularInline):
     model = ProductIngredient
@@ -30,7 +36,7 @@ class ProductIngredientInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "price")
+    list_display = ("name", "category", "dispatch_area", "price")
     search_fields = ("name",)
     list_filter = ("category",)
     inlines = [ProductIngredientInline]

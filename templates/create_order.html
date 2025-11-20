@@ -86,15 +86,16 @@
     <button type="submit">Crear Comanda</button>
   </form>
 {% if order %}
-  <div 
+<div 
     x-data="{
         comandaHtml: '',
         async init() {
             const response = await fetch('{% url "print_order" order.id %}');
             this.comandaHtml = await response.text();
+            console.log(this.comandaHtml);
         }
     }"
->
+  >
     <iframe :srcdoc="comandaHtml" frameborder="0" style="display: none"></iframe>
 </div>
 {% endif %}

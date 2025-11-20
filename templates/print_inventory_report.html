@@ -1,0 +1,45 @@
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  <h1>Reporte de saldos</h1>
+  <h2>{{today|date:"d/m/Y H:i"}}</h2>
+  <p>Generado por: {{request.user.username}}</p>
+    <table class="striped">
+      <thead>
+        <tr>
+          <th>Ingrediente</th>
+          <th>Cant</th>
+          <th>Unidad</th>
+          
+        </tr>
+      </thead>
+      <tbody>
+        {% for i in ingredients %}
+        <tr>
+            
+          <td>{{ i.name }}</td>
+          
+          <td>{{ i.stock_quantity|floatformat:2|intcomma }}</td>
+          <td>{{ i.unit|default:"—" }}</td>
+          
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4" style="text-align:center;">No hay ingredientes registrados.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <script>
+        window.onload = function() {
+            window.print();
+        };
+    </script>
+</body>
+</html>

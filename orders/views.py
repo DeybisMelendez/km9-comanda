@@ -297,7 +297,18 @@ def report_inventory(request):
     """Muestra el estado actual del inventario."""
     ingredients = Ingredient.objects.all().order_by("name")
     total = ingredients.count()
-    return render(request, "report_inventory.html", {"ingredients": ingredients, "total_items": total})
+    context = {"ingredients": ingredients, "total_items": total}
+    if request.method == "GET" and request.GET.get("print") == "true":
+        context['print'] = True
+    return render(request, "report_inventory.html", context)
+
+@login_required
+@user_passes_test(is_encargado)
+def print_inventory_report(request):
+    ingredients = Ingredient.objects.all().order_by("name")
+    total = ingredients.count()
+    today = timezone.now()
+    return render(request, "print_inventory_report.html", {"ingredients": ingredients, "total_items": total, "today": today})
 
 
 @login_required
@@ -335,6 +346,7 @@ def report_orders(request):
         items = OrderItem.objects.filter(order__created_at__range=(start, end)).select_related(
             "order", "product", "order__table", "order__user"
         )
+    items = items.order_by("-id")
     tables = Table.objects.all()
     return render(request, "report_orders.html", {"order_items": items, "start": start, "end": end, "tables": tables, "table": table})
 
@@ -392,6 +404,7 @@ def export_movements_csv(request):
 
     writer = csv.writer(response)
     writer.writerow(["Fecha", "Cantidad", "Ingrediente", "Razón", "Usuario"])
+    
     for m in moves:
         writer.writerow([
             m.created_at.strftime("%Y-%m-%d %H:%M"),
@@ -411,26 +424,38 @@ def sales_report_by_product(request):
     # Filtramos solo órdenes pagadas en el rango seleccionado
     items = (
         OrderItem.objects.filter(order__is_paid=True, order__created_at__range=(start, end))
-        .select_related("product")
-        .values("product__name")
+        .select_related("product", )
+        .values("product__name", "product__dispatch_area__name")
         .annotate(
             total_qty=Sum("quantity"),
             total_sales=Sum(F("quantity") * F("product__price")),
             price=F("product__price"),
         )
-        .order_by("-total_sales")
+        .order_by("product__dispatch_area__name","product__name")
     )
 
     # Total general del rango
     total_sales = sum((i["total_sales"] or 0) for i in items)
+    
+    
+    totals_by_dispatch_area = (
+    OrderItem.objects.filter(order__is_paid=True, order__created_at__range=(start, end))
+    .values("product__dispatch_area__name")
+    .annotate(
+        area_total_qty=Sum("quantity"),
+        area_total_sales=Sum(F("quantity") * F("product__price")),
+    )
+    .order_by("product__dispatch_area__name")
+)
+
 
     context = {
         "items": items,
         "total_sales": total_sales,
         "start": start,
         "end": end,
+        "totals_by_dispatch_area": totals_by_dispatch_area,
     }
-
     return render(request, "sales_report_by_product.html", context)
 
 @login_required
@@ -441,13 +466,13 @@ def export_sales_by_product_csv(request):
     items = (
         OrderItem.objects.filter(order__is_paid=True, order__created_at__range=(start, end))
         .select_related("product")
-        .values("product__name")
+        .values("product__name", "product__dispatch_area__name")
         .annotate(
             total_qty=Sum("quantity"),
             total_sales=Sum(F("quantity") * F("product__price")),
             price=F("product__price"),
         )
-        .order_by("-total_sales")
+        .order_by("product__dispatch_area__name", "product__name")
     )
 
     response = HttpResponse(content_type="text/csv")

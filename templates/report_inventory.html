@@ -7,6 +7,7 @@
       <a href="{% url 'export_inventory_csv' %}" role="button">
         ⬇️ Descargar CSV
       </a>
+      <a href="{% url 'report_inventory' %}?print=true" role="button">🖨️ Imprimir Reporte</a>
 
   <div class="class="overflow-auto"">
     <table class="striped">
@@ -37,5 +38,18 @@
       </tbody>
     </table>
 </div>
+{% if print %}
+  <div 
+    x-data="{
+      comandaHtml: '',
+      async init() {
+        const response = await fetch('{% url "print_inventory_report" %}');
+        this.comandaHtml = await response.text();
+      }
+    }"
+  >
+    <iframe :srcdoc="comandaHtml" frameborder="0" style="display: none"></iframe>
+  </div>
+{% endif %}
 </main>
 {% endblock %}
