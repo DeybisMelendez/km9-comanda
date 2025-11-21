@@ -232,7 +232,7 @@ def daily_report(request):
 @user_passes_test(is_encargado)
 def inventory_movement(request):
     """Ajustes de inventario físico."""
-    ingredients = Ingredient.objects.all().order_by("name")
+    ingredients = Ingredient.objects.all().order_by("warehouse","name")
 
     if request.method == "POST":
         note = request.POST.get("note", "").strip()
@@ -265,7 +265,7 @@ def inventory_movement(request):
 @user_passes_test(is_encargado)
 def purchase_ingredients(request):
     """Registra compras de ingredientes."""
-    ingredients = Ingredient.objects.all().order_by("name")
+    ingredients = Ingredient.objects.all().order_by("warehouse","name")
 
     if request.method == "POST":
         count = 0

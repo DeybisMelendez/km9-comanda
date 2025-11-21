@@ -21,6 +21,12 @@ class DispatchArea(models.Model):
     def __str__(self):
         return self.name
 
+class Warehouse(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
+
 class Product(models.Model):
     name = models.CharField(max_length=255)
     category = models.ForeignKey(ProductCategory, on_delete=models.SET_NULL, null=True, blank=True)
@@ -49,7 +55,8 @@ class Ingredient(models.Model):
     unit = models.CharField(
         max_length=10, choices=UNITS, default="und", verbose_name="Unidad"
     )
-
+    warehouse = models.ForeignKey(Warehouse, on_delete=models.SET_NULL, null=True, blank=True)
+    
     def add_stock(self, amount):
         """Agrega cantidad al stock."""
         self.stock_quantity += Decimal(amount)

@@ -10,6 +10,7 @@
     <table>
       <thead>
         <tr>
+          <th>Bodega</th>
           <th>Ingrediente</th>
           <th>Stock Actual</th>
           <th>Saldo Encontrado</th>
@@ -20,6 +21,7 @@
       <tbody>
         {% for ing in ingredients %}
           <tr x-data="{ actual: {{ ing.stock_quantity }}, found: {{ ing.stock_quantity }}, get diff() { return (this.found - this.actual).toFixed(2); } }">
+            <td>{{ing.warehouse}}</td>
             <td>{{ ing.name }}</td>
             <td x-text="actual"></td>
             <td>

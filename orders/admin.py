@@ -3,6 +3,7 @@ from .models import (
     Table,
     ProductCategory,
     DispatchArea,
+    Warehouse,
     Product,
     Ingredient,
     ProductIngredient,
@@ -25,6 +26,11 @@ class ProductCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(DispatchArea)
 class DispatchAreaAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name",)
+    
+@admin.register(Warehouse)
+class WarehouseAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
 

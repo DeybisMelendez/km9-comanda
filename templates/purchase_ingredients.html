@@ -10,6 +10,7 @@
     <table>
       <thead>
         <tr>
+          <th>Bodega</th>
           <th>Ingrediente</th>
           <th>Unidad</th>
           <th>Stock Actual</th>
@@ -19,6 +20,7 @@
       <tbody>
         {% for ing in ingredients %}
         <tr>
+          <td>{{ ing.warehouse }}</td>
           <td>{{ ing.name }}</td>
           <td>{{ ing.unit }}</td>
           <td>{{ ing.stock_quantity|floatformat:2|intcomma }}</td>
