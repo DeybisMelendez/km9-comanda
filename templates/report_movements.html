@@ -18,8 +18,8 @@
           <input type="datetime-local" name="end" value="{{ end|date:'Y-m-d\\TH:i' }}">
       </div>
       <div>
-          <label>Buscar por razón:</label>
-          <input type="text" name="search" placeholder="Ej: compra, ajuste…" {% if search %}value="{{ search }}"{% endif %}>
+          <label>Buscar:</label>
+          <input type="text" name="search" placeholder="Ej: compra, ajuste, arroz…" {% if search %}value="{{ search }}"{% endif %}>
       </div>
   </div>
   <button type="submit">Filtrar</button>
