@@ -10,6 +10,7 @@ from django.db.models import F, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.db.models import Q
 
 from .models import (Ingredient, IngredientMovement, Order, OrderItem, Product,
                      ProductCategory, Table)
@@ -388,23 +389,55 @@ def export_orders_csv(request):
 def report_movements(request):
     """Lista los movimientos de inventario."""
     start, end = parse_date_range(request)
-    moves = IngredientMovement.objects.filter(created_at__range=(start, end)).select_related("ingredient")
-    return render(request, "report_movements.html", {"movements": moves, "start": start, "end": end})
 
+    moves = (
+        IngredientMovement.objects
+        .filter(created_at__range=(start, end))
+        .select_related("ingredient")
+    )
+
+    # --- Búsqueda ---
+    search = request.GET.get("search")
+    if search:
+        moves = moves.filter(
+            Q(reason__icontains=search) |
+            Q(ingredient__name__icontains=search)
+        )
+
+    return render(
+        request,
+        "report_movements.html",
+        {"movements": moves, "start": start, "end": end, "search": search}
+    )
 
 @login_required
 @user_passes_test(is_encargado)
 def export_movements_csv(request):
     """Exporta los movimientos de inventario a CSV."""
     start, end = parse_date_range(request)
-    moves = IngredientMovement.objects.filter(created_at__range=(start, end)).select_related("ingredient")
+
+    moves = (
+        IngredientMovement.objects
+        .filter(created_at__range=(start, end))
+        .select_related("ingredient")
+    )
+
+    # --- Filtro de búsqueda (igual que la vista principal) ---
+    search = request.GET.get("search")
+    if search:
+        moves = moves.filter(
+            Q(reason__icontains=search) |
+            Q(ingredient__name__icontains=search)
+        )
 
     response = HttpResponse(content_type="text/csv")
-    response["Content-Disposition"] = f'attachment; filename="movimientos_{datetime.now():%Y%m%d_%H%M}.csv"'
+    response["Content-Disposition"] = (
+        f'attachment; filename="movimientos_{datetime.now():%Y%m%d_%H%M}.csv"'
+    )
 
     writer = csv.writer(response)
     writer.writerow(["Fecha", "Cantidad", "Ingrediente", "Razón", "Usuario"])
-    
+
     for m in moves:
         writer.writerow([
             m.created_at.strftime("%Y-%m-%d %H:%M"),
@@ -413,6 +446,7 @@ def export_movements_csv(request):
             m.reason or "—",
             m.user.username if m.user else "—",
         ])
+
     return response
 
 @login_required

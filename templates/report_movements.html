@@ -4,20 +4,27 @@
 {% block body %}
 <main class="container">
   <h1>Reporte de Ajustes de Inventario</h1>
-  <a href="{% url 'export_movements_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}" role="button">Descargar CSV</a>
+  <a href="{% url 'export_movements_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}&search={{ search }}" role="button">
+      Descargar CSV
+  </a>
   <form method="get">
-    <div class="grid">
-        <div>
-            <label>Desde:</label>
-            <input type="datetime-local" name="start" value="{{ start|date:'Y-m-d\\TH:i' }}">
-        </div>
-        <div>
-            <label>Hasta:</label>
-            <input type="datetime-local" name="end" value="{{ end|date:'Y-m-d\\TH:i' }}">
-        </div>
-    </div>
-    <button type="submit">Filtrar</button>
-  </form>
+  <div class="grid">
+      <div>
+          <label>Desde:</label>
+          <input type="datetime-local" name="start" value="{{ start|date:'Y-m-d\\TH:i' }}">
+      </div>
+      <div>
+          <label>Hasta:</label>
+          <input type="datetime-local" name="end" value="{{ end|date:'Y-m-d\\TH:i' }}">
+      </div>
+      <div>
+          <label>Buscar por razón:</label>
+          <input type="text" name="search" placeholder="Ej: compra, ajuste…" {% if search %}value="{{ search }}"{% endif %}>
+      </div>
+  </div>
+  <button type="submit">Filtrar</button>
+</form>
+
   <div class="overflow-auto">
     <table class="striped">
     <thead>
