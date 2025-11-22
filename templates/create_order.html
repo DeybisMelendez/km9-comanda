@@ -16,7 +16,8 @@
         }
       }">
 
-  <h1>Nueva Comanda - Mesa {{ table.name }}</h1>
+  <article>
+    <h1>Nueva Comanda - Mesa {{ table.name }}</h1>
   <hr>
   <!-- Categorías -->
   <h2>Categorías</h2>
@@ -32,12 +33,12 @@
   <!-- Formulario -->
   <form method="post">{% csrf_token %}
     <h2 x-text="showCategory || 'Todos los productos'"></h2>
-    <table>
+    <table class="striped">
       <thead>
         <tr>
-          <th style="width:60%">Producto</th>
-          <th style="width:20%">Precio</th>
-          <th>Cantidad</th>
+          <th style="width:60%" scope="col">Producto</th>
+          <th style="width:20%" scope="col">Precio</th>
+          <th scope="col">Cantidad</th>
         </tr>
       </thead>
       <tbody>
@@ -60,16 +61,21 @@
         {% endfor %}
       </tbody>
     </table>
+  </article>
     <!-- Resumen de productos -->
-  <h2>Resumen de Productos</h2>
-  <table>
-    <tr>
-      <th>Producto</th>
-      <th>Cantidad</th>
-      <th>Precio</th>
-      <th>Monto</th>
+  <article>
+    <h2>Resumen de Productos</h2>
+  <table class="striped">
+    <thead>
+      <tr>
+      <th scope="col">Producto</th>
+      <th scope="col">Cantidad</th>
+      <th scope="col">Precio</th>
+      <th scope="col">Monto</th>
     </tr>
-    <template x-for="(product, id) in products" :key="id">
+    </thead>
+    <tbody>
+      <template x-for="(product, id) in products" :key="id">
       <tr x-show="product.qty > 0" class="card">
         <td x-text="`${product.name}`"></td>
         <td x-text="`${product.qty}`"></td>
@@ -77,11 +83,15 @@
         <td x-text="`C$ ${product.qty * product.price}`"></td>
       </tr>
     </template>
-    <tr>
+    </tbody>
+    <tfoot>
+      <tr>
       <td colspan="3">Total:</td>
       <td>C$ <span x-text="Object.values(products).reduce((sum, p) => sum + p.qty * p.price, 0)"></span></td>
     </tr>
+    </tfoot>
   </table>
+  </article>
   
     <button type="submit">Crear Comanda</button>
   </form>
