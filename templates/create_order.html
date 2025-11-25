@@ -63,31 +63,31 @@
     </table>
   </article>
     <!-- Resumen de productos -->
-  <article class="pico-background-orange-500">
+  <article class="pico-background-orange-400">
     <h2>Resumen de Productos</h2>
-  <table class="striped">
+  <table>
     <thead>
       <tr>
-      <th scope="col">Producto</th>
-      <th scope="col">Cantidad</th>
-      <th scope="col">Precio</th>
-      <th scope="col">Monto</th>
+      <th class="pico-background-orange-300" scope="col">Producto</th>
+      <th class="pico-background-orange-300" scope="col">Cantidad</th>
+      <th class="pico-background-orange-300" scope="col">Precio</th>
+      <th class="pico-background-orange-300" scope="col">Monto</th>
     </tr>
     </thead>
     <tbody>
       <template x-for="(product, id) in products" :key="id">
       <tr x-show="product.qty > 0" class="card">
-        <td x-text="`${product.name}`"></td>
-        <td x-text="`${product.qty}`"></td>
-        <td x-text="`C$ ${product.price}`"></td>
-        <td x-text="`C$ ${product.qty * product.price}`"></td>
+        <td class="pico-background-orange-200" x-text="`${product.name}`"></td>
+        <td class="pico-background-orange-200"  x-text="`${product.qty}`"></td>
+        <td class="pico-background-orange-200"  x-text="`C$ ${product.price}`"></td>
+        <td class="pico-background-orange-200"  x-text="`C$ ${product.qty * product.price}`"></td>
       </tr>
     </template>
     </tbody>
     <tfoot>
       <tr>
-      <td colspan="3">Total:</td>
-      <td>C$ <span x-text="Object.values(products).reduce((sum, p) => sum + p.qty * p.price, 0)"></span></td>
+      <td class="pico-background-orange-300"  colspan="3">Total:</td>
+      <td class="pico-background-orange-300">C$ <span x-text="Object.values(products).reduce((sum, p) => sum + p.qty * p.price, 0)"></span></td>
     </tr>
     </tfoot>
   </table>
