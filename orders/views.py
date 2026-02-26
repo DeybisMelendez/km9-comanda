@@ -7,12 +7,23 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.db.models import F, Q, Sum
+from django.forms import modelformset_factory
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .models import (DispatchArea, Ingredient, IngredientMovement, Order,
-                     OrderItem, Product, ProductCategory, Table)
+from .forms import ProductIngredientForm
+from .models import (
+    DispatchArea,
+    Ingredient,
+    IngredientMovement,
+    Order,
+    OrderItem,
+    Product,
+    ProductCategory,
+    ProductIngredient,
+    Table,
+)
 
 # ==========================
 # 🔐 UTILIDADES Y PERMISOS
@@ -209,8 +220,6 @@ def order_history(request):
         .select_related("table", "user")
         .order_by("-created_at")
     )
-    total = orders.count()
-    paid = orders.filter(is_paid=True).count()
 
     return render(
         request,
@@ -938,5 +947,87 @@ def dispatch_area_delete(request, area_id):
         {
             "area": area,
             "products_using_area": products_using_area,
+        },
+    )
+
+
+# ==========================
+# 📋 GESTIÓN DE RECETAS
+# ==========================
+
+
+@login_required
+@user_passes_test(is_encargado)
+def product_recipes(request, product_id):
+    """Gestiona todos los ingredientes de un producto usando formsets."""
+    product = get_object_or_404(Product, id=product_id)
+
+    # Crear formset para ProductIngredient
+    ProductIngredientFormSet = modelformset_factory(
+        ProductIngredient,
+        form=ProductIngredientForm,
+        extra=1,  # 1 formulario vacío inicial para agregar nuevos ingredientes dinámicamente
+        can_delete=True,
+    )
+
+    # Queryset solo para este producto
+    queryset = ProductIngredient.objects.filter(product=product).order_by(
+        "ingredient__name"
+    )
+
+    if request.method == "POST":
+        formset = ProductIngredientFormSet(
+            request.POST,
+            queryset=queryset,
+            form_kwargs={"product": product},  # Pasar producto para validación
+        )
+
+        if formset.is_valid():
+            try:
+                with transaction.atomic():
+                    instances = formset.save(commit=False)
+
+                    # Validar que no haya ingredientes duplicados en el formset
+                    ingredient_ids = []
+                    for instance in instances:
+                        if not instance.id:  # Nueva instancia
+                            instance.product = product
+
+                        # Verificar duplicados dentro del formset
+                        if instance.ingredient_id in ingredient_ids:
+                            messages.error(
+                                request,
+                                f"❌ El ingrediente '{instance.ingredient.name}' está duplicado.",
+                            )
+                            return redirect("product_recipes", product_id=product.id)
+                        ingredient_ids.append(instance.ingredient_id)
+
+                    # Guardar todas las instancias
+                    for instance in instances:
+                        instance.save()
+
+                    # Eliminar las marcadas para borrar
+                    for obj in formset.deleted_objects:
+                        obj.delete()
+
+                    messages.success(request, "✅ Receta actualizada exitosamente.")
+                    return redirect("product_recipes", product_id=product.id)
+
+            except Exception as e:
+                messages.error(request, f"❌ Error al guardar receta: {e}")
+        else:
+            messages.error(request, "❌ Corrige los errores en el formulario.")
+    else:
+        formset = ProductIngredientFormSet(
+            queryset=queryset,
+            form_kwargs={"product": product},
+        )
+
+    return render(
+        request,
+        "product_recipes.html",
+        {
+            "product": product,
+            "formset": formset,
         },
     )

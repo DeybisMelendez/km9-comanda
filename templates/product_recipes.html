@@ -1,0 +1,171 @@
+{% extends "layout.html" %}
+{% load humanize %}
+{% load static %}
+{% block title %}📋 Receta de {{ product.name }}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/form.css' %}">
+    <style>
+        /* Ocultar checkboxes DELETE */
+        input[name$="-DELETE"] {
+            display: none;
+        }
+    </style>
+{% endblock %}
+{% block extra_js %}
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('recipeForm', (initialCount) => ({
+                formCount: initialCount,
+                nextIndex: initialCount,
+                
+                init() {
+                    this.updateTotalForms();
+                },
+                
+                updateTotalForms() {
+                    document.getElementById('id_form-TOTAL_FORMS').value = this.formCount;
+                },
+                
+                addForm() {
+                    const template = document.getElementById('empty-form-template');
+                    const container = document.getElementById('formset-container');
+                    
+                    // Clonar el contenido del template
+                    const newRow = template.content.cloneNode(true);
+                    const newIndex = this.nextIndex;
+                    
+                    // Reemplazar __prefix__ en todos los elementos
+                    newRow.querySelectorAll('input, select, label').forEach(el => {
+                        if (el.name) el.name = el.name.replace(/__prefix__/g, newIndex);
+                        if (el.id) el.id = el.id.replace(/__prefix__/g, newIndex);
+                        if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/__prefix__/g, newIndex);
+                    });
+                    
+                    // Establecer el atributo data-form-index
+                    const tr = newRow.querySelector('tr');
+                    tr.setAttribute('data-form-index', newIndex);
+                    
+                    // Agregar event listener al botón eliminar
+                    const deleteBtn = tr.querySelector('.delete-row');
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', () => {
+                            this.removeForm(newIndex, false);
+                        });
+                    }
+                    
+                    container.appendChild(newRow);
+                    this.nextIndex++;
+                    this.formCount++;
+                    this.updateTotalForms();
+                },
+                
+                removeForm(index, hasPk) {
+                    const row = document.querySelector(`[data-form-index='${index}']`);
+                    if (!row) return;
+                    
+                    // Para todas las filas, marcar el checkbox DELETE y ocultar la fila
+                    const deleteCheckbox = row.querySelector('input[name$="-DELETE"]');
+                    if (deleteCheckbox) {
+                        deleteCheckbox.checked = true;
+                    }
+                    row.style.display = 'none';
+                    
+                    // No reducimos formCount porque las filas marcadas DELETE aún cuentan en TOTAL_FORMS
+                }
+            }));
+        });
+    </script>
+{% endblock %}
+{% block body %}
+    <div class="main__container">
+        <h1>📋 Receta de {{ product.name }}</h1>
+        {% include "includes/_messages.html" %}
+        <div class="card">
+            <div class="card__header">
+                <h2 class="card__title">Gestionar Ingredientes</h2>
+                <p class="card__subtitle">Agrega, edita o elimina ingredientes de la receta.</p>
+            </div>
+            <div class="card__body">
+                <form method="post"
+                      class="form"
+                      x-data="recipeForm({{ formset.total_form_count }})">
+                    {% csrf_token %}
+                    {{ formset.management_form }}
+                    <!-- Template para fila vacía (oculto) -->
+                    <template id="empty-form-template">
+                        <tr class="formset-row" data-form-index="__prefix__">
+                            <td>
+                                {{ formset.empty_form.id }}
+                                {{ formset.empty_form.ingredient }}
+                                <small class="form__help"></small>
+                            </td>
+                            <td class="table__cell--numeric">{{ formset.empty_form.quantity }}</td>
+                            <td class="table__cell--center">
+                                <button type="button" class="button button--danger button--small delete-row">🗑️ Eliminar</button>
+                                {{ formset.empty_form.DELETE }}
+                            </td>
+                        </tr>
+                    </template>
+                    <div class="table-responsive">
+                        <table class="table table--striped table--responsive">
+                            <thead>
+                                <tr>
+                                    <th>Ingrediente</th>
+                                    <th class="table__cell--numeric">Cantidad por Producto</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="formset-container">
+                                {% for form in formset %}
+                                    <tr class="formset-row" data-form-index="{{ forloop.counter0 }}">
+                                        <td>
+                                            {{ form.id }}
+                                            {% if form.ingredient.errors %}<div class="form__error">{{ form.ingredient.errors }}</div>{% endif %}
+                                            {{ form.ingredient }}
+                                            {% if form.instance.pk %}<small class="form__help">{{ form.instance.ingredient.unit }}</small>{% endif %}
+                                        </td>
+                                        <td class="table__cell--numeric">
+                                            {% if form.quantity.errors %}<div class="form__error">{{ form.quantity.errors }}</div>{% endif %}
+                                            {{ form.quantity }}
+                                        </td>
+                                        <td class="table__cell--center">
+                                            <button type="button"
+                                                    class="button button--danger button--small"
+                                                    @click="removeForm({{ forloop.counter0 }}, {{ form.instance.pk|yesno:'true,false' }})">
+                                                🗑️ Eliminar
+                                            </button>
+                                            {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form__group">
+                        <button type="button" class="button button--success" @click="addForm()">➕ Agregar Ingrediente</button>
+                        <button type="submit" class="button button--primary">💾 Guardar Receta</button>
+                        <a href="{% url 'product_list' %}" class="button button--secondary">↩️ Volver a Productos</a>
+                    </div>
+                    <div class="messages messages--info">
+                        <p>
+                            <strong>💡 Instrucciones:</strong>
+                        </p>
+                        <ul>
+                            <li>
+                                Para <strong>agregar</strong> nuevos ingredientes, haz clic en "Agregar Ingrediente".
+                            </li>
+                            <li>
+                                Para <strong>editar</strong>, cambia el ingrediente o la cantidad.
+                            </li>
+                            <li>
+                                Para <strong>eliminar</strong>, haz clic en el botón "Eliminar" de cada fila.
+                            </li>
+                            <li>Un ingrediente no puede aparecer más de una vez en la receta.</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

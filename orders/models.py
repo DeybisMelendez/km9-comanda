@@ -75,6 +75,10 @@ class Ingredient(models.Model):
     def __str__(self):
         return f"{self.name} ({self.stock_quantity} {self.unit})"
 
+    def name_with_unit(self):
+        """Retorna el nombre con la unidad para mostrar en selects."""
+        return f"{self.name} ({self.unit})"
+
 
 class ProductIngredient(models.Model):
     """Relación de ingredientes que usa cada producto."""
@@ -83,8 +87,16 @@ class ProductIngredient(models.Model):
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=10, decimal_places=2)
 
+    class Meta:
+        unique_together = [["product", "ingredient"]]
+        verbose_name = "Receta"
+        verbose_name_plural = "Recetas"
+
     def __str__(self):
-        return f"{self.quantity} {self.ingredient.unit} de {self.ingredient.name} para {self.product.name}"
+        return (
+            f"{self.quantity} {self.ingredient.unit} de {self.ingredient.name} "
+            f"para {self.product.name}"
+        )
 
 
 class IngredientMovement(models.Model):

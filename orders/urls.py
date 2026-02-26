@@ -64,6 +64,12 @@ urlpatterns = [
         views.product_delete,
         name="product_delete",
     ),
+    # Gestión de recetas
+    path(
+        "productos/<int:product_id>/recetas/",
+        views.product_recipes,
+        name="product_recipes",
+    ),
     # Gestión de categorías de productos
     path("categorias/", views.category_list, name="category_list"),
     path("categorias/nueva/", views.category_create, name="category_create"),

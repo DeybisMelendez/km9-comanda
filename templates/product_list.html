@@ -38,6 +38,9 @@
                                     <td class="table__cell--numeric">{{ product.price|floatformat:2|intcomma }}</td>
                                     <td>
                                         <div class="button-group">
+                                            <a href="{% url 'product_recipes' product.id %}"
+                                               class="button button--info button--small"
+                                               title="Receta">📋</a>
                                             <a href="{% url 'product_edit' product.id %}"
                                                class="button button--secondary button--small"
                                                title="Editar">✏️</a>

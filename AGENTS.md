@@ -48,6 +48,7 @@ python manage.py collectstatic
 **IMPORTANT**: Do NOT write Python tests for this project. The verification of functionality should be done manually by the developer/user through the browser.
 
 **Verification Protocol**:
+
 1. After making changes, ask the developer to test the functionality directly in the browser
 2. Do not create or modify test files (`tests.py`)
 3. Focus on ensuring the code works correctly in the actual application context
@@ -72,7 +73,7 @@ black path/to/file.py
 isort path/to/file.py
 
 # Check code style with flake8 (for specific files)
-flake8 path/to/file.py
+flake8 path/to/file.py --max-line-length=100
 
 # Type checking with mypy (for specific files)
 mypy path/to/file.py
@@ -82,11 +83,13 @@ djlint --reformat path/to/template.html
 ```
 
 **Nota importante**: Los comandos de formateo están separados por lenguaje:
+
 - **Para Python**: usar `black`, `isort`, `flake8`, `mypy`
 - **Para HTML**: usar `djlint`
-No mezclar herramientas entre lenguajes (ej. no usar `black` en archivos HTML ni `djlint` en archivos Python).
+  No mezclar herramientas entre lenguajes (ej. no usar `black` en archivos HTML ni `djlint` en archivos Python).
 
 **Tools installed**:
+
 - **Black 26.1.0** – code formatting
 - **isort 8.0.0** – import sorting
 - **flake8 7.3.0** – style guide enforcement
@@ -163,6 +166,7 @@ name = models.CharField(max_length=255, unique=True, verbose_name="Nombre")
 - Override `save()` when necessary, but call `super().save()`.
 
 Example:
+
 ```python
 class Ingredient(models.Model):
     UNITS = [
@@ -170,11 +174,11 @@ class Ingredient(models.Model):
         ("lb", "Libras"),
         # ...
     ]
-    
+
     def add_stock(self, amount):
         self.stock_quantity += Decimal(amount)
         self.save()
-    
+
     def __str__(self):
         return f"{self.name} ({self.stock_quantity} {self.unit})"
 ```
@@ -210,6 +214,7 @@ class Ingredient(models.Model):
 - Use inline comments sparingly; prefer clear variable and function names.
 
 Example:
+
 ```python
 # ==========================
 # 🧾 INVENTARIO Y MOVIMIENTOS
@@ -221,12 +226,14 @@ Example:
 Detailed frontend specifications are documented in [`docs/frontend.md`](docs/frontend.md). Key points:
 
 ### Architecture
+
 - **Interactivity**: Use AlpineJS for simple interactivity; avoid custom JavaScript when possible.
 - **JavaScript**: If required, place in `static/js/` with descriptive filenames.
 - **Styles**: Pure CSS with BEM methodology (Block, Element, Modifier). **PicoCSS has been removed**; all styling uses custom BEM blocks.
 - **Template extensions**: Use `{% block extra_css %}` and `{% block extra_js %}` in templates to add page-specific assets.
 
 ### CSS Structure
+
 - **Directory**: `static/css/` – one file per BEM block.
 - **Naming**: Bloques reutilizables con nombres **semánticos y funcionales**, no genéricos, utilitarios ni específicos para una plantilla. Los nombres deben describir el propósito del componente, no su apariencia o ubicación.
   - **Correcto**: `.card`, `.toolbar`, `.ads`, `.grid`, `.messages`, `.list` (componentes reutilizables)
@@ -235,11 +242,13 @@ Detailed frontend specifications are documented in [`docs/frontend.md`](docs/fro
 - **File organization**: Each block documented with its purpose at the top.
 
 ### BEM Convention
+
 - **Block**: `.miBloque` (independent component)
 - **Element**: `.miBloque__suElemento` (part of a block)
 - **Modifier**: `.miBloque--suModificador` (variant)
 
 ### Maintenance
+
 - When creating new CSS blocks/files, update `docs/frontend.md` and this `AGENTS.md`.
 - Ensure new CSS files are available in `static/css/` for selective import. Optionally, add them to `static/css/styles.css` for bundling.
 
@@ -252,6 +261,7 @@ Detailed frontend specifications are documented in [`docs/frontend.md`](docs/fro
 ## CI/CD
 
 No continuous integration pipeline is configured. If adding one, consider:
+
 - Running Django tests
 - Checking for missing migrations (`python manage.py makemigrations --check`)
 - Linting with `flake8` (now available)
@@ -279,4 +289,5 @@ No continuous integration pipeline is configured. If adding one, consider:
 11. Always activate the virtual environment (`.env/bin/activate`) before running any Python commands.
 
 ---
-*Last updated: 2026‑02‑26*
+
+_Last updated: 2026‑02‑26_

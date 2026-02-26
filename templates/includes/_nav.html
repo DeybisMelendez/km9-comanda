@@ -32,43 +32,31 @@
                     </a>
                 </li>
                 {% if user|is_encargado %}
-                    <!-- Productos -->
-                    <li class="nav__item">
-                        <a href="{% url 'product_list' %}"
-                           class="nav__link {% if request.resolver_match.url_name == 'product_list' or request.resolver_match.url_name == 'product_create' or request.resolver_match.url_name == 'product_edit' or request.resolver_match.url_name == 'product_delete' %}nav__link--active{% endif %}">
-                            Productos
-                        </a>
-                    </li>
-                    <!-- Categorías -->
-                    <li class="nav__item">
-                        <a href="{% url 'category_list' %}"
-                           class="nav__link {% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_create' or request.resolver_match.url_name == 'category_edit' or request.resolver_match.url_name == 'category_delete' %}nav__link--active{% endif %}">
-                            Categorías
-                        </a>
-                    </li>
-                    <!-- Áreas de Despacho -->
-                    <li class="nav__item">
-                        <a href="{% url 'dispatch_area_list' %}"
-                           class="nav__link {% if request.resolver_match.url_name == 'dispatch_area_list' or request.resolver_match.url_name == 'dispatch_area_create' or request.resolver_match.url_name == 'dispatch_area_edit' or request.resolver_match.url_name == 'dispatch_area_delete' %}nav__link--active{% endif %}">
-                            Áreas de Despacho
-                        </a>
+                    <!-- Gestión del Menú -->
+                    <li class="nav__item nav__dropdown">
+                        <a href="#" class="nav__link">Gestión del Menú</a>
+                        <div class="nav__dropdown-content">
+                            <a href="{% url 'product_list' %}" class="nav__dropdown-link">Productos</a>
+                            <a href="{% url 'category_list' %}" class="nav__dropdown-link">Categorías</a>
+                            <a href="{% url 'dispatch_area_list' %}" class="nav__dropdown-link">Áreas de Despacho</a>
+                        </div>
                     </li>
                     <!-- Inventario -->
                     <li class="nav__item nav__dropdown">
-                        <a href="#" class="nav__link">Ingredientes</a>
+                        <a href="#" class="nav__link">Inventario</a>
                         <div class="nav__dropdown-content">
-                            <a href="{% url 'inventory_movement' %}" class="nav__dropdown-link">Movimientos</a>
-                            <a href="{% url 'purchase_ingredients' %}" class="nav__dropdown-link">Ingresos</a>
+                            <a href="{% url 'inventory_movement' %}" class="nav__dropdown-link">Registrar Movimientos</a>
+                            <a href="{% url 'purchase_ingredients' %}" class="nav__dropdown-link">Ingresos de Inventario</a>
+                            <a href="{% url 'report_inventory' %}" class="nav__dropdown-link">Saldo Actual</a>
                         </div>
                     </li>
                     <!-- Reportes -->
                     <li class="nav__item nav__dropdown">
                         <a href="#" class="nav__link">Reportes</a>
                         <div class="nav__dropdown-content">
-                            <a href="{% url 'sales_report_by_product' %}" class="nav__dropdown-link">Ventas</a>
+                            <a href="{% url 'sales_report_by_product' %}" class="nav__dropdown-link">Ventas por Producto</a>
                             <a href="{% url 'report_orders' %}" class="nav__dropdown-link">Comandas</a>
-                            <a href="{% url 'report_movements' %}" class="nav__dropdown-link">Movimiento de Inventario</a>
-                            <a href="{% url 'report_inventory' %}" class="nav__dropdown-link">Saldo de Inventario</a>
+                            <a href="{% url 'report_movements' %}" class="nav__dropdown-link">Historial de Movimientos</a>
                         </div>
                     </li>
                 {% endif %}
