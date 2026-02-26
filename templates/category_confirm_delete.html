@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}🗑️ Eliminar Categoría{% endblock %}
+{% block body %}
+    <div class="main__container">
+        <h1>🗑️ Eliminar Categoría</h1>
+        {% include "includes/_messages.html" %}
+        <div class="card">
+            <div class="card__body">
+                {% if products_using_category > 0 %}
+                    <div class="messages messages--warning">
+                        <p>
+                            <strong>⚠️ Advertencia:</strong> Esta categoría está siendo usada por <strong>{{ products_using_category }}</strong> producto(s).
+                        </p>
+                        <p>Si eliminas esta categoría, los productos que la usan quedarán sin categoría asignada.</p>
+                        <p>¿Deseas continuar con la eliminación?</p>
+                    </div>
+                {% else %}
+                    <p>
+                        ¿Está seguro que desea eliminar la categoría <strong>"{{ category.name }}"</strong>?
+                    </p>
+                    <p>Esta acción no se puede deshacer.</p>
+                {% endif %}
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    <div class="form__group">
+                        <button type="submit" class="button button--danger">🗑️ Sí, eliminar categoría</button>
+                        <a href="{% url 'category_list' %}" class="button button--secondary">↩️ Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

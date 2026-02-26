@@ -32,6 +32,27 @@
                     </a>
                 </li>
                 {% if user|is_encargado %}
+                    <!-- Productos -->
+                    <li class="nav__item">
+                        <a href="{% url 'product_list' %}"
+                           class="nav__link {% if request.resolver_match.url_name == 'product_list' or request.resolver_match.url_name == 'product_create' or request.resolver_match.url_name == 'product_edit' or request.resolver_match.url_name == 'product_delete' %}nav__link--active{% endif %}">
+                            Productos
+                        </a>
+                    </li>
+                    <!-- Categorías -->
+                    <li class="nav__item">
+                        <a href="{% url 'category_list' %}"
+                           class="nav__link {% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_create' or request.resolver_match.url_name == 'category_edit' or request.resolver_match.url_name == 'category_delete' %}nav__link--active{% endif %}">
+                            Categorías
+                        </a>
+                    </li>
+                    <!-- Áreas de Despacho -->
+                    <li class="nav__item">
+                        <a href="{% url 'dispatch_area_list' %}"
+                           class="nav__link {% if request.resolver_match.url_name == 'dispatch_area_list' or request.resolver_match.url_name == 'dispatch_area_create' or request.resolver_match.url_name == 'dispatch_area_edit' or request.resolver_match.url_name == 'dispatch_area_delete' %}nav__link--active{% endif %}">
+                            Áreas de Despacho
+                        </a>
+                    </li>
                     <!-- Inventario -->
                     <li class="nav__item nav__dropdown">
                         <a href="#" class="nav__link">Ingredientes</a>

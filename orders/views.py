@@ -11,8 +11,8 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
-from .models import (Ingredient, IngredientMovement, Order, OrderItem, Product,
-                     ProductCategory, Table)
+from .models import (DispatchArea, Ingredient, IngredientMovement, Order,
+                     OrderItem, Product, ProductCategory, Table)
 
 # ==========================
 # 🔐 UTILIDADES Y PERMISOS
@@ -612,3 +612,331 @@ def export_sales_by_product_csv(request):
         )
 
     return response
+
+
+# ==========================
+# 📦 GESTIÓN DE PRODUCTOS
+# ==========================
+
+
+@login_required
+@user_passes_test(is_encargado)
+def product_list(request):
+    """Lista todos los productos."""
+    products = (
+        Product.objects.all()
+        .select_related("category", "dispatch_area")
+        .order_by("name")
+    )
+    return render(request, "product_list.html", {"products": products})
+
+
+@login_required
+@user_passes_test(is_encargado)
+def product_create(request):
+    """Crea un nuevo producto."""
+    categories = ProductCategory.objects.all().order_by("name")
+    dispatch_areas = DispatchArea.objects.all().order_by("name")
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        category_id = request.POST.get("category") or None
+        dispatch_area_id = request.POST.get("dispatch_area") or None
+        price = request.POST.get("price")
+
+        if not name or not price:
+            messages.error(request, "❌ Nombre y precio son obligatorios.")
+        else:
+            try:
+                product = Product.objects.create(
+                    name=name,
+                    category_id=category_id,
+                    dispatch_area_id=dispatch_area_id,
+                    price=Decimal(price),
+                )
+                messages.success(
+                    request, f"✅ Producto '{product.name}' creado exitosamente."
+                )
+                return redirect("product_list")
+            except Exception as e:
+                messages.error(request, f"❌ Error al crear producto: {e}")
+
+    return render(
+        request,
+        "product_form.html",
+        {
+            "categories": categories,
+            "dispatch_areas": dispatch_areas,
+            "title": "Crear Producto",
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_encargado)
+def product_edit(request, product_id):
+    """Edita un producto existente."""
+    product = get_object_or_404(Product, id=product_id)
+    categories = ProductCategory.objects.all().order_by("name")
+    dispatch_areas = DispatchArea.objects.all().order_by("name")
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        category_id = request.POST.get("category") or None
+        dispatch_area_id = request.POST.get("dispatch_area") or None
+        price = request.POST.get("price")
+
+        if not name or not price:
+            messages.error(request, "❌ Nombre y precio son obligatorios.")
+        else:
+            try:
+                product.name = name
+                product.category_id = category_id
+                product.dispatch_area_id = dispatch_area_id
+                product.price = Decimal(price)
+                product.save()
+                messages.success(
+                    request, f"✅ Producto '{product.name}' actualizado exitosamente."
+                )
+                return redirect("product_list")
+            except Exception as e:
+                messages.error(request, f"❌ Error al actualizar producto: {e}")
+
+    return render(
+        request,
+        "product_form.html",
+        {
+            "product": product,
+            "categories": categories,
+            "dispatch_areas": dispatch_areas,
+            "title": "Editar Producto",
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_encargado)
+def product_delete(request, product_id):
+    """Elimina un producto."""
+    product = get_object_or_404(Product, id=product_id)
+
+    if request.method == "POST":
+        try:
+            product_name = product.name
+            product.delete()
+            messages.success(
+                request, f"✅ Producto '{product_name}' eliminado exitosamente."
+            )
+            return redirect("product_list")
+        except Exception as e:
+            messages.error(request, f"❌ Error al eliminar producto: {e}")
+            return redirect("product_list")
+
+    return render(request, "product_confirm_delete.html", {"product": product})
+
+
+# ==========================
+# 🏷️ GESTIÓN DE CATEGORÍAS DE PRODUCTOS
+# ==========================
+
+
+@login_required
+@user_passes_test(is_encargado)
+def category_list(request):
+    """Lista todas las categorías de productos."""
+    categories = ProductCategory.objects.all().order_by("name")
+    return render(request, "category_list.html", {"categories": categories})
+
+
+@login_required
+@user_passes_test(is_encargado)
+def category_create(request):
+    """Crea una nueva categoría de producto."""
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        if not name:
+            messages.error(request, "❌ El nombre de la categoría es obligatorio.")
+        else:
+            try:
+                category = ProductCategory.objects.create(name=name)
+                messages.success(
+                    request, f"✅ Categoría '{category.name}' creada exitosamente."
+                )
+                return redirect("category_list")
+            except Exception as e:
+                messages.error(request, f"❌ Error al crear categoría: {e}")
+
+    return render(request, "category_form.html", {"title": "Crear Categoría"})
+
+
+@login_required
+@user_passes_test(is_encargado)
+def category_edit(request, category_id):
+    """Edita una categoría existente."""
+    category = get_object_or_404(ProductCategory, id=category_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        if not name:
+            messages.error(request, "❌ El nombre de la categoría es obligatorio.")
+        else:
+            try:
+                category.name = name
+                category.save()
+                messages.success(
+                    request, f"✅ Categoría '{category.name}' actualizada exitosamente."
+                )
+                return redirect("category_list")
+            except Exception as e:
+                messages.error(request, f"❌ Error al actualizar categoría: {e}")
+
+    return render(
+        request,
+        "category_form.html",
+        {"category": category, "title": "Editar Categoría"},
+    )
+
+
+@login_required
+@user_passes_test(is_encargado)
+def category_delete(request, category_id):
+    """Elimina una categoría."""
+    category = get_object_or_404(ProductCategory, id=category_id)
+
+    # Verificar si hay productos usando esta categoría
+    products_using_category = Product.objects.filter(category=category).count()
+
+    if request.method == "POST":
+        try:
+            category_name = category.name
+            category.delete()
+            messages.success(
+                request, f"✅ Categoría '{category_name}' eliminada exitosamente."
+            )
+            return redirect("category_list")
+        except Exception as e:
+            messages.error(request, f"❌ Error al eliminar categoría: {e}")
+            return redirect("category_list")
+
+    return render(
+        request,
+        "category_confirm_delete.html",
+        {
+            "category": category,
+            "products_using_category": products_using_category,
+        },
+    )
+
+
+# ==========================
+# 🚚 GESTIÓN DE ÁREAS DE DESPACHO
+# ==========================
+
+
+@login_required
+@user_passes_test(is_encargado)
+def dispatch_area_list(request):
+    """Lista todas las áreas de despacho."""
+    areas = DispatchArea.objects.all().order_by("name")
+    return render(request, "dispatch_area_list.html", {"areas": areas})
+
+
+@login_required
+@user_passes_test(is_encargado)
+def dispatch_area_create(request):
+    """Crea una nueva área de despacho."""
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        if not name:
+            messages.error(
+                request, "❌ El nombre del área de despacho es obligatorio."
+            )  # noqa: E501
+        else:
+            try:
+                area = DispatchArea.objects.create(name=name)
+                messages.success(
+                    request,
+                    f"✅ Área de despacho '{area.name}' creada exitosamente.",
+                )
+                return redirect("dispatch_area_list")
+            except Exception as e:
+                messages.error(
+                    request, f"❌ Error al crear área de despacho: {e}"
+                )  # noqa: E501
+
+    return render(
+        request,
+        "dispatch_area_form.html",
+        {"title": "Crear Área de Despacho"},
+    )
+
+
+@login_required
+@user_passes_test(is_encargado)
+def dispatch_area_edit(request, area_id):
+    """Edita un área de despacho existente."""
+    area = get_object_or_404(DispatchArea, id=area_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+
+        if not name:
+            messages.error(
+                request, "❌ El nombre del área de despacho es obligatorio."
+            )  # noqa: E501
+        else:
+            try:
+                area.name = name
+                area.save()
+                messages.success(
+                    request,
+                    f"✅ Área de despacho '{area.name}' actualizada exitosamente.",
+                )
+                return redirect("dispatch_area_list")
+            except Exception as e:
+                messages.error(
+                    request, f"❌ Error al actualizar área de despacho: {e}"
+                )  # noqa: E501
+
+    return render(
+        request,
+        "dispatch_area_form.html",
+        {"area": area, "title": "Editar Área de Despacho"},
+    )
+
+
+@login_required
+@user_passes_test(is_encargado)
+def dispatch_area_delete(request, area_id):
+    """Elimina un área de despacho."""
+    area = get_object_or_404(DispatchArea, id=area_id)
+
+    # Verificar si hay productos usando esta área
+    products_using_area = Product.objects.filter(dispatch_area=area).count()
+
+    if request.method == "POST":
+        try:
+            area_name = area.name
+            area.delete()
+            messages.success(
+                request,
+                f"✅ Área de despacho '{area_name}' eliminada exitosamente.",
+            )
+            return redirect("dispatch_area_list")
+        except Exception as e:
+            messages.error(
+                request, f"❌ Error al eliminar área de despacho: {e}"
+            )  # noqa: E501
+            return redirect("dispatch_area_list")
+
+    return render(
+        request,
+        "dispatch_area_confirm_delete.html",
+        {
+            "area": area,
+            "products_using_area": products_using_area,
+        },
+    )

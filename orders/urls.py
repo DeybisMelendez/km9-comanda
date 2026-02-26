@@ -55,4 +55,41 @@ urlpatterns = [
         views.export_sales_by_product_csv,
         name="export_sales_by_product_csv",
     ),
+    # Gestión de productos
+    path("productos/", views.product_list, name="product_list"),
+    path("productos/nuevo/", views.product_create, name="product_create"),
+    path("productos/<int:product_id>/editar/", views.product_edit, name="product_edit"),
+    path(
+        "productos/<int:product_id>/eliminar/",
+        views.product_delete,
+        name="product_delete",
+    ),
+    # Gestión de categorías de productos
+    path("categorias/", views.category_list, name="category_list"),
+    path("categorias/nueva/", views.category_create, name="category_create"),
+    path(
+        "categorias/<int:category_id>/editar/",
+        views.category_edit,
+        name="category_edit",
+    ),
+    path(
+        "categorias/<int:category_id>/eliminar/",
+        views.category_delete,
+        name="category_delete",
+    ),
+    # Gestión de áreas de despacho
+    path("areas-despacho/", views.dispatch_area_list, name="dispatch_area_list"),
+    path(
+        "areas-despacho/nueva/", views.dispatch_area_create, name="dispatch_area_create"
+    ),
+    path(
+        "areas-despacho/<int:area_id>/editar/",
+        views.dispatch_area_edit,
+        name="dispatch_area_edit",
+    ),
+    path(
+        "areas-despacho/<int:area_id>/eliminar/",
+        views.dispatch_area_delete,
+        name="dispatch_area_delete",
+    ),
 ]
