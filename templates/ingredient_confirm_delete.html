@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}🗑️ Eliminar Ingrediente{% endblock %}
+{% block body %}
+    <div class="main__container">
+        <h1>🗑️ Eliminar Ingrediente</h1>
+        {% include "includes/_messages.html" %}
+        <div class="card">
+            <div class="card__body">
+                <p>
+                    ¿Está seguro que desea eliminar el ingrediente <strong>"{{ ingredient.name }}"</strong>?
+                </p>
+                {% if movements_count > 0 or recipes_count > 0 %}
+                    <div class="alert alert--warning">
+                        <p>
+                            <strong>⚠️ Advertencia:</strong> Este ingrediente tiene registros asociados:
+                        </p>
+                        <ul>
+                            {% if movements_count > 0 %}<li>{{ movements_count }} movimiento(s) de inventario.</li>{% endif %}
+                            {% if recipes_count > 0 %}<li>{{ recipes_count }} receta(s) de producto(s).</li>{% endif %}
+                        </ul>
+                        <p>Si elimina este ingrediente, esos registros también se eliminarán (movimientos y recetas).</p>
+                    </div>
+                {% endif %}
+                <p>Esta acción no se puede deshacer.</p>
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    <div class="form__group">
+                        <button type="submit" class="button button--danger">🗑️ Sí, eliminar ingrediente</button>
+                        <a href="{% url 'ingredient_list' %}" class="button button--secondary">↩️ Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -12,27 +12,16 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
+from users.utils import has_valid_role, is_encargado
+
 from .forms import ProductIngredientForm
-from .models import (
-    DispatchArea,
-    Ingredient,
-    IngredientMovement,
-    Order,
-    OrderItem,
-    Product,
-    ProductCategory,
-    ProductIngredient,
-    Table,
-)
+from .models import (DispatchArea, Ingredient, IngredientMovement, Order,
+                     OrderItem, Product, ProductCategory, ProductIngredient,
+                     Table, Warehouse)
 
 # ==========================
 # 🔐 UTILIDADES Y PERMISOS
 # ==========================
-
-
-def is_encargado(user):
-    """Verifica si el usuario pertenece al grupo Encargado."""
-    return user.groups.filter(name="Encargado").exists()
 
 
 def parse_date_range(request):
@@ -57,6 +46,7 @@ def parse_date_range(request):
 
 
 @login_required
+@user_passes_test(has_valid_role)
 def table_list(request):
     """Muestra todas las mesas y su total pendiente."""
     tables = Table.objects.all().order_by("name")
@@ -78,6 +68,7 @@ def table_list(request):
 
 
 @login_required
+@user_passes_test(has_valid_role)
 def table_orders(request, table_id):
     """Lista de comandas activas de una mesa."""
     table = get_object_or_404(Table, id=table_id)
@@ -90,6 +81,7 @@ def table_orders(request, table_id):
 
 
 @login_required
+@user_passes_test(is_encargado)
 def mark_table_paid(request, table_id):
     """Marca todas las órdenes no pagadas de una mesa como pagadas."""
     table = get_object_or_404(Table, id=table_id)
@@ -113,6 +105,7 @@ def mark_table_paid(request, table_id):
 
 
 @login_required
+@user_passes_test(has_valid_role)
 def create_order(request, table_id):
     """Crea una nueva comanda para una mesa."""
     table = get_object_or_404(Table, id=table_id)
@@ -147,6 +140,7 @@ def create_order(request, table_id):
 
 
 @login_required
+@user_passes_test(has_valid_role)
 def order_detail(request, order_id):
     """Muestra el detalle de una comanda."""
     order = get_object_or_404(Order, id=order_id)
@@ -189,6 +183,8 @@ def edit_order(request, order_id):
     )
 
 
+@login_required
+@user_passes_test(has_valid_role)
 def print_order(request, order_id):
     """Vista de impresión de comanda."""
     order = get_object_or_404(Order, id=order_id)
@@ -210,6 +206,7 @@ def print_order(request, order_id):
 
 
 @login_required
+@user_passes_test(has_valid_role)
 def order_history(request):
     """Muestra comandas de un día específico."""
     days_ago = int(request.GET.get("days_ago", 0))
@@ -1029,5 +1026,129 @@ def product_recipes(request, product_id):
         {
             "product": product,
             "formset": formset,
+        },
+    )
+
+
+# ==========================
+# 🧂 GESTIÓN DE INGREDIENTES
+# ==========================
+
+
+@login_required
+@user_passes_test(is_encargado)
+def ingredient_list(request):
+    """Lista todos los ingredientes."""
+    ingredients = Ingredient.objects.all().select_related("warehouse").order_by("name")
+    return render(request, "ingredient_list.html", {"ingredients": ingredients})
+
+
+@login_required
+@user_passes_test(is_encargado)
+def ingredient_create(request):
+    """Crea un nuevo ingrediente."""
+    warehouses = Warehouse.objects.all().order_by("name")
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        unit = request.POST.get("unit")
+        warehouse_id = request.POST.get("warehouse") or None
+
+        if not name or not unit:
+            messages.error(request, "❌ Nombre y unidad son obligatorios.")
+        else:
+            try:
+                ingredient = Ingredient.objects.create(
+                    name=name,
+                    unit=unit,
+                    warehouse_id=warehouse_id,
+                )
+                messages.success(
+                    request, f"✅ Ingrediente '{ingredient.name}' creado exitosamente."
+                )
+                return redirect("ingredient_list")
+            except Exception as e:
+                messages.error(request, f"❌ Error al crear ingrediente: {e}")
+
+    return render(
+        request,
+        "ingredient_form.html",
+        {
+            "warehouses": warehouses,
+            "units": Ingredient.UNITS,
+            "title": "Crear Ingrediente",
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_encargado)
+def ingredient_edit(request, ingredient_id):
+    """Edita un ingrediente existente."""
+    ingredient = get_object_or_404(Ingredient, id=ingredient_id)
+    warehouses = Warehouse.objects.all().order_by("name")
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        unit = request.POST.get("unit")
+        warehouse_id = request.POST.get("warehouse") or None
+
+        if not name or not unit:
+            messages.error(request, "❌ Nombre y unidad son obligatorios.")
+        else:
+            try:
+                ingredient.name = name
+                ingredient.unit = unit
+                ingredient.warehouse_id = warehouse_id
+                ingredient.save()
+                messages.success(
+                    request,
+                    f"✅ Ingrediente '{ingredient.name}' actualizado exitosamente.",
+                )
+                return redirect("ingredient_list")
+            except Exception as e:
+                messages.error(request, f"❌ Error al actualizar ingrediente: {e}")
+
+    return render(
+        request,
+        "ingredient_form.html",
+        {
+            "ingredient": ingredient,
+            "warehouses": warehouses,
+            "units": Ingredient.UNITS,
+            "title": "Editar Ingrediente",
+        },
+    )
+
+
+@login_required
+@user_passes_test(is_encargado)
+def ingredient_delete(request, ingredient_id):
+    """Elimina un ingrediente."""
+    ingredient = get_object_or_404(Ingredient, id=ingredient_id)
+
+    # Verificar si hay movimientos o recetas usando este ingrediente
+    movements_count = IngredientMovement.objects.filter(ingredient=ingredient).count()
+    recipes_count = ProductIngredient.objects.filter(ingredient=ingredient).count()
+
+    if request.method == "POST":
+        try:
+            ingredient_name = ingredient.name
+            ingredient.delete()
+            messages.success(
+                request, f"✅ Ingrediente '{ingredient_name}' eliminado exitosamente."
+            )
+            return redirect("ingredient_list")
+        except Exception as e:
+            messages.error(request, f"❌ Error al eliminar ingrediente: {e}")
+            return redirect("ingredient_list")
+
+    return render(
+        request,
+        "ingredient_confirm_delete.html",
+        {
+            "ingredient": ingredient,
+            "movements_count": movements_count,
+            "recipes_count": recipes_count,
         },
     )

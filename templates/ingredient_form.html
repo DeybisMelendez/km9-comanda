@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% load static %}
+{% block title %}{{ title }}{% endblock %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/form.css' %}">
+{% endblock %}
+{% block body %}
+    <div class="main__container">
+        <h1>{{ title }}</h1>
+        {% include "includes/_messages.html" %}
+        <div class="card">
+            <div class="card__body">
+                <form method="post" class="form">
+                    {% csrf_token %}
+                    <div class="form__group">
+                        <label for="name" class="form__label">Nombre del Ingrediente *</label>
+                        <input type="text"
+                               id="name"
+                               name="name"
+                               value="{% if ingredient %}{{ ingredient.name }}{% endif %}"
+                               required
+                               class="form__control"
+                               placeholder="Ej: Harina de trigo">
+                    </div>
+                    <div class="form__group">
+                        <label for="unit" class="form__label">Unidad *</label>
+                        <select id="unit" name="unit" required class="form__control">
+                            <option value="">--- Selecciona una unidad ---</option>
+                            {% for unit_code, unit_name in units %}
+                                <option value="{{ unit_code }}"
+                                        {% if ingredient and ingredient.unit == unit_code %}selected{% endif %}>
+                                    {{ unit_name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form__group">
+                        <label for="warehouse" class="form__label">Almacén (opcional)</label>
+                        <select id="warehouse" name="warehouse" class="form__control">
+                            <option value="">--- Sin almacén ---</option>
+                            {% for warehouse in warehouses %}
+                                <option value="{{ warehouse.id }}"
+                                        {% if ingredient and ingredient.warehouse.id == warehouse.id %}selected{% endif %}>
+                                    {{ warehouse.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form__group">
+                        <button type="submit" class="button button--primary">💾 Guardar Ingrediente</button>
+                        <a href="{% url 'ingredient_list' %}" class="button button--secondary">↩️ Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

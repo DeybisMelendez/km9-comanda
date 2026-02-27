@@ -45,9 +45,10 @@
                     <li class="nav__item nav__dropdown">
                         <a href="#" class="nav__link">Inventario</a>
                         <div class="nav__dropdown-content">
-                            <a href="{% url 'inventory_movement' %}" class="nav__dropdown-link">Registrar Movimientos</a>
-                            <a href="{% url 'purchase_ingredients' %}" class="nav__dropdown-link">Ingresos de Inventario</a>
-                            <a href="{% url 'report_inventory' %}" class="nav__dropdown-link">Saldo Actual</a>
+                             <a href="{% url 'inventory_movement' %}" class="nav__dropdown-link">Registrar Movimientos</a>
+                             <a href="{% url 'purchase_ingredients' %}" class="nav__dropdown-link">Ingresos de Inventario</a>
+                             <a href="{% url 'report_inventory' %}" class="nav__dropdown-link">Saldo Actual</a>
+                             <a href="{% url 'ingredient_list' %}" class="nav__dropdown-link">Ingredientes</a>
                         </div>
                     </li>
                     <!-- Reportes -->
@@ -60,9 +61,13 @@
                         </div>
                     </li>
                 {% endif %}
-                {% if user.is_staff %}
-                    <li class="nav__item">
-                        <a href="/admin/" class="nav__link">Admin</a>
+                {% if user|is_admin %}
+                    <li class="nav__item nav__dropdown">
+                        <a href="#" class="nav__link">Administración</a>
+                        <div class="nav__dropdown-content">
+                            <a href="{% url 'user_list' %}" class="nav__dropdown-link">Usuarios</a>
+                            <a href="/admin/" class="nav__dropdown-link" target="_blank">Panel Admin</a>
+                        </div>
                     </li>
                 {% endif %}
             </ul>

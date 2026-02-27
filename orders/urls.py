@@ -98,4 +98,17 @@ urlpatterns = [
         views.dispatch_area_delete,
         name="dispatch_area_delete",
     ),
+    # Gestión de ingredientes
+    path("ingredientes/", views.ingredient_list, name="ingredient_list"),
+    path("ingredientes/nuevo/", views.ingredient_create, name="ingredient_create"),
+    path(
+        "ingredientes/<int:ingredient_id>/editar/",
+        views.ingredient_edit,
+        name="ingredient_edit",
+    ),
+    path(
+        "ingredientes/<int:ingredient_id>/eliminar/",
+        views.ingredient_delete,
+        name="ingredient_delete",
+    ),
 ]
