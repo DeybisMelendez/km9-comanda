@@ -4,26 +4,32 @@
 {% block title %}Historial de Comandas{% endblock %}
 {% block extra_css %}
     <link rel="stylesheet" href="{% static 'css/table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/button-group.css' %}">
 {% endblock %}
 {% block body %}
     <div x-data="{ fecha: '{{ target_date|date:"Y-m-d" }}' }">
         <h1><i class="material-icons">history</i> Historial de Comandas</h1>
         <!-- Navegación por días -->
         <div class="button-group button-group--centered">
-            <a href="?days_ago={{ prev_days_ago }}" class="button button--outline">← Día anterior</a>
+            <a href="?days_ago={{ prev_days_ago }}" class="button button--outline">
+                <i class="material-icons" style="font-size: 1rem;">chevron_left</i>
+                Día anterior
+            </a>
             <span class="button button--outline"
-                  style="background-color: transparent;
-                         border-color: transparent;
-                         pointer-events: none">
+                  style="background-color: transparent; border-color: transparent;">
                 <strong>{{ target_date|date:"d/m/Y" }}</strong>
             </span>
             {% if days_ago > 0 %}
-                <a href="?days_ago={{ next_days_ago }}" class="button button--outline">Día siguiente →</a>
+                <a href="?days_ago={{ next_days_ago }}" class="button button--outline">
+                    Día siguiente
+                    <i class="material-icons" style="font-size: 1rem;">chevron_right</i>
+                </a>
             {% else %}
                 <span class="button button--outline"
-                      style="opacity: 0.5;
-                             cursor: not-allowed;
-                             pointer-events: none">Día siguiente →</span>
+                      style="opacity: 0.5; cursor: not-allowed;">
+                    Día siguiente
+                    <i class="material-icons" style="font-size: 1rem;">chevron_right</i>
+                </span>
             {% endif %}
         </div>
         {% if orders %}

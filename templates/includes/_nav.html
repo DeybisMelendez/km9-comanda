@@ -1,7 +1,25 @@
+{% load static %}
 {% load user_tags %}
-<header class="nav" x-data="{ mobileMenuOpen: false }">
+<!-- Info bar: usuario y fecha/hora -->
+<div class="nav__info-bar" x-data="datetimeUpdater">
     <div class="nav__container">
-        <a href="{% url 'dashboard' %}" class="nav__brand"><i class="material-icons">restaurant</i> Boa POS</a>
+        <div class="nav__user-info">
+            <i class="material-icons">person</i>
+            <strong>{{ user|get_group }}:</strong> {{ request.user }}
+        </div>
+        <div class="nav__datetime">
+            <span x-text="time"></span>
+            <span class="nav__datetime-sep">|</span>
+            <span x-text="date"></span>
+        </div>
+    </div>
+</div>
+<header class="nav">
+    <div class="nav__container">
+        <a href="{% url 'dashboard' %}" class="nav__brand">
+            <i class="material-icons nav__brand-icon">restaurant</i>
+            <span>Boa POS</span>
+        </a>
         <button class="nav__toggle"
                 @click="mobileMenuOpen = !mobileMenuOpen"
                 aria-label="Toggle menu">
@@ -85,11 +103,30 @@
                 <li class="nav__item">
                     <form method="post" action="{% url 'logout' %}" class="nav__form">
                         {% csrf_token %}
-                        <button type="submit"
-                                class="button button--small button--outline button--danger"><i class="material-icons">logout</i> Salir</button>
+                        <button type="submit" class="button button--small button--danger">
+                            <i class="material-icons">logout</i>
+                            <span>Salir</span>
+                        </button>
                     </form>
                 </li>
             </ul>
         </div>
     </div>
 </header>
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('datetimeUpdater', () => ({
+            time: '',
+            date: '',
+            update() {
+                const now = new Date();
+                this.time = now.toLocaleTimeString('es-NI', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                this.date = now.toLocaleDateString('es-NI', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+            },
+            init() {
+                this.update();
+                setInterval(() => this.update(), 1000);
+            }
+        }));
+    });
+</script>

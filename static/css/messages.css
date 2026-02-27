@@ -1,6 +1,6 @@
 /* ============================================
    MESSAGE
-   Bloque para mensajes de alerta, notificaciones y feedback
+   Bloque para mensajes de alerta y notificaciones
    ============================================ */
 
 .message {
@@ -8,20 +8,30 @@
   border-radius: var(--border-radius-md);
   border: 1px solid transparent;
   margin-bottom: var(--space-md);
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.5;
   position: relative;
-  transition: all 0.3s ease;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+}
+
+.message::before {
+  font-family: "Material Icons";
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
 .message__title {
   font-weight: 600;
   margin-bottom: var(--space-xs);
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .message__body {
   margin: 0;
+  flex: 1;
 }
 
 .message__close {
@@ -33,10 +43,9 @@
   font-size: 1.25rem;
   line-height: 1;
   color: inherit;
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: pointer;
   padding: var(--space-xs);
-  margin: calc(var(--space-xs) * -1);
   transition: opacity 0.2s;
 }
 
@@ -46,80 +55,101 @@
 
 /* Modificadores por tipo */
 .message--success {
-  background-color: rgba(var(--color-success), 0.1);
+  background-color: rgba(22, 163, 74, 0.1);
   border-color: var(--color-success);
   color: var(--color-success);
 }
 
+.message--success::before {
+  content: "check_circle";
+}
+
 .message--info {
-  background-color: rgba(var(--color-info), 0.1);
+  background-color: rgba(8, 145, 178, 0.1);
   border-color: var(--color-info);
   color: var(--color-info);
 }
 
+.message--info::before {
+  content: "info";
+}
+
 .message--warning {
-  background-color: rgba(var(--color-warning), 0.1);
+  background-color: rgba(217, 119, 6, 0.1);
   border-color: var(--color-warning);
   color: var(--color-warning);
 }
 
+.message--warning::before {
+  content: "warning";
+}
+
 .message--danger,
 .message--error {
-  background-color: rgba(var(--color-danger), 0.1);
+  background-color: rgba(220, 38, 38, 0.1);
   border-color: var(--color-danger);
   color: var(--color-danger);
 }
 
+.message--danger::before,
+.message--error::before {
+  content: "error";
+}
+
 .message--primary {
-  background-color: rgba(var(--color-primary), 0.1);
+  background-color: rgba(37, 99, 235, 0.1);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
+.message--primary::before {
+  content: "campaign";
+}
+
 .message--secondary,
 .message--debug {
-  background-color: rgba(var(--color-secondary), 0.1);
+  background-color: rgba(107, 114, 128, 0.1);
   border-color: var(--color-secondary);
   color: var(--color-secondary);
 }
 
+.message--secondary::before {
+  content: "chat_bubble";
+}
+
 /* Modificadores de estilo */
 .message--solid {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
-  color: white;
+  border-color: transparent;
 }
 
 .message--solid.message--success {
   background-color: var(--color-success);
-  border-color: var(--color-success);
+  color: white;
 }
 
 .message--solid.message--info {
   background-color: var(--color-info);
-  border-color: var(--color-info);
+  color: white;
 }
 
 .message--solid.message--warning {
   background-color: var(--color-warning);
-  border-color: var(--color-warning);
-  color: #212529;
+  color: white;
 }
 
 .message--solid.message--danger {
   background-color: var(--color-danger);
-  border-color: var(--color-danger);
+  color: white;
 }
 
 .message--solid.message--primary {
   background-color: var(--color-primary);
-  border-color: var(--color-primary);
+  color: white;
 }
 
-.message--solid.message--secondary,
-.message--solid.message--debug {
+.message--solid.message--secondary {
   background-color: var(--color-secondary);
-  border-color: var(--color-secondary);
+  color: white;
 }
 
 .message--outline {
@@ -130,26 +160,12 @@
   border-width: 2px;
 }
 
-/* Message con icono */
-.message--with-icon {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-md);
-}
-
-.message__icon {
-  font-size: 1.5rem;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-/* Message desmontable */
 .message--dismissible {
   padding-right: calc(var(--space-lg) * 2);
 }
 
 /* ============================================
-   MESSAGES (Contenedor de mensajes)
+   MESSAGES (Contenedor)
    ============================================ */
 
 .messages {

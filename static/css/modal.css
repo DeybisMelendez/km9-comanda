@@ -17,7 +17,7 @@
   background-color: rgba(0, 0, 0, 0.5);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition: all 0.3s;
 }
 
 .modal--open {
@@ -27,8 +27,8 @@
 
 .modal__dialog {
   background-color: var(--color-bg);
-  border-radius: var(--border-radius-lg);
-  box-shadow: var(--shadow-lg);
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
@@ -49,12 +49,20 @@
   justify-content: space-between;
   padding: var(--space-lg);
   border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-bg-alt);
 }
 
 .modal__title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.modal__title i {
   color: var(--color-primary);
 }
 
@@ -63,10 +71,9 @@
   border: none;
   font-size: 1.5rem;
   line-height: 1;
-  color: var(--color-secondary);
+  color: var(--color-text-secondary);
   cursor: pointer;
   padding: var(--space-xs);
-  margin: calc(var(--space-xs) * -1);
   transition: color 0.2s;
 }
 

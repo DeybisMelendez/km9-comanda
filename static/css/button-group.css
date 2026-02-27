@@ -9,6 +9,10 @@
   margin-bottom: var(--space-lg);
 }
 
+.button-group .button {
+  flex: 0 0 auto;
+}
+
 .button-group--centered {
   justify-content: center;
 }
@@ -46,6 +50,5 @@
   .button-group .button {
     width: 100%;
     justify-content: center;
-    flex: none;
   }
 }

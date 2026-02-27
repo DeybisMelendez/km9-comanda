@@ -4,12 +4,11 @@
    ============================================ */
 
 .footer {
-  padding-top: var(--space-xl);
-  padding-bottom: var(--space-xl);
+  padding-top: var(--space-lg);
+  padding-bottom: var(--space-lg);
   border-top: 1px solid var(--color-border);
   background-color: var(--color-bg);
   color: var(--color-text);
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
 }
 
 .footer__container {
@@ -19,28 +18,67 @@
   margin-right: auto;
   padding-left: var(--space-md);
   padding-right: var(--space-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.footer__brand {
+  font-weight: 600;
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.footer__brand i {
+  font-size: 1.25rem;
+}
+
+.footer__links {
+  display: flex;
+  gap: var(--space-lg);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer__links a {
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.footer__links a:hover {
+  color: var(--color-primary);
 }
 
 .footer__copyright {
+  width: 100%;
   text-align: center;
-  margin: 0;
-  font-size: 0.9rem;
-  color: var(--color-secondary);
+  margin: var(--space-md) 0 0 0;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  padding-top: var(--space-md);
 }
 
 .footer__copyright a {
   color: var(--color-primary);
-  text-decoration: underline;
+  text-decoration: none;
+  font-weight: 500;
 }
 
 .footer__copyright a:hover {
-  color: var(--color-secondary);
+  text-decoration: underline;
 }
 
 /* Modificadores */
 .footer--compact {
-  padding-top: var(--space-lg);
-  padding-bottom: var(--space-lg);
+  padding-top: var(--space-md);
+  padding-bottom: var(--space-md);
 }
 
 .footer--transparent {
@@ -50,19 +88,29 @@
 
 .footer--dark {
   background-color: #1a1a1a;
-  color: #f0f0f0;
+  color: #e0e0e0;
   border-top-color: #333;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
   .footer {
-    padding-top: var(--space-lg);
-    padding-bottom: var(--space-lg);
+    padding-top: var(--space-md);
+    padding-bottom: var(--space-md);
+  }
+
+  .footer__container {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer__links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-md);
   }
 
   .footer__copyright {
-    font-size: 0.85rem;
-    line-height: 1.5;
+    font-size: 0.8rem;
   }
 }

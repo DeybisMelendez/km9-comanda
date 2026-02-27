@@ -10,7 +10,7 @@
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-lg);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
   line-height: 1.5;
   text-align: center;
@@ -19,23 +19,22 @@
   vertical-align: middle;
   cursor: pointer;
   user-select: none;
-  border: 1px solid transparent;
+  border: 1px solid var(--color-border);
   border-radius: var(--border-radius-md);
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   background-color: var(--color-bg);
   color: var(--color-text);
-  border-color: var(--color-border);
 }
 
 .button:hover {
-  background-color: rgba(var(--color-primary), 0.1);
+  background-color: var(--color-bg-alt);
   border-color: var(--color-primary);
   color: var(--color-primary);
 }
 
 .button:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(var(--color-primary), 0.3);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .button:active {
@@ -43,7 +42,7 @@
 }
 
 .button:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
   pointer-events: none;
 }
@@ -56,8 +55,8 @@
 }
 
 .button--primary:hover {
-  background-color: rgba(var(--color-primary), 0.9);
-  border-color: rgba(var(--color-primary), 0.9);
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
   color: white;
 }
 
@@ -68,8 +67,8 @@
 }
 
 .button--secondary:hover {
-  background-color: rgba(var(--color-secondary), 0.9);
-  border-color: rgba(var(--color-secondary), 0.9);
+  background-color: #4b5563;
+  border-color: #4b5563;
   color: white;
 }
 
@@ -80,8 +79,8 @@
 }
 
 .button--success:hover {
-  background-color: rgba(var(--color-success), 0.9);
-  border-color: rgba(var(--color-success), 0.9);
+  background-color: #15803d;
+  border-color: #15803d;
   color: white;
 }
 
@@ -92,21 +91,21 @@
 }
 
 .button--danger:hover {
-  background-color: rgba(var(--color-danger), 0.9);
-  border-color: rgba(var(--color-danger), 0.9);
+  background-color: #b91c1c;
+  border-color: #b91c1c;
   color: white;
 }
 
 .button--warning {
   background-color: var(--color-warning);
   border-color: var(--color-warning);
-  color: var(--color-text);
+  color: white;
 }
 
 .button--warning:hover {
-  background-color: rgba(var(--color-warning), 0.9);
-  border-color: rgba(var(--color-warning), 0.9);
-  color: var(--color-text);
+  background-color: #b45309;
+  border-color: #b45309;
+  color: white;
 }
 
 .button--info {
@@ -116,21 +115,29 @@
 }
 
 .button--info:hover {
-  background-color: rgba(var(--color-info), 0.9);
-  border-color: rgba(var(--color-info), 0.9);
+  background-color: #0e7490;
+  border-color: #0e7490;
   color: white;
 }
 
 /* Modificadores de estilo */
 .button--outline {
   background-color: transparent;
+  border-width: 2px;
+}
+
+.button--outline:hover {
+  background-color: var(--color-bg-alt);
+}
+
+.button--outline.button--primary {
   color: var(--color-primary);
   border-color: var(--color-primary);
 }
 
-.button--outline:hover {
-  background-color: rgba(var(--color-primary), 0.1);
-  color: var(--color-primary);
+.button--outline.button--primary:hover {
+  background-color: var(--color-primary);
+  color: white;
 }
 
 .button--outline.button--secondary {
@@ -139,7 +146,8 @@
 }
 
 .button--outline.button--secondary:hover {
-  background-color: rgba(var(--color-secondary), 0.1);
+  background-color: var(--color-secondary);
+  color: white;
 }
 
 .button--outline.button--success {
@@ -148,7 +156,8 @@
 }
 
 .button--outline.button--success:hover {
-  background-color: rgba(var(--color-success), 0.1);
+  background-color: var(--color-success);
+  color: white;
 }
 
 .button--outline.button--danger {
@@ -157,7 +166,8 @@
 }
 
 .button--outline.button--danger:hover {
-  background-color: rgba(var(--color-danger), 0.1);
+  background-color: var(--color-danger);
+  color: white;
 }
 
 .button--outline.button--warning {
@@ -166,7 +176,8 @@
 }
 
 .button--outline.button--warning:hover {
-  background-color: rgba(var(--color-warning), 0.1);
+  background-color: var(--color-warning);
+  color: white;
 }
 
 .button--outline.button--info {
@@ -175,7 +186,8 @@
 }
 
 .button--outline.button--info:hover {
-  background-color: rgba(var(--color-info), 0.1);
+  background-color: var(--color-info);
+  color: white;
 }
 
 /* Modificadores de tamaño */
