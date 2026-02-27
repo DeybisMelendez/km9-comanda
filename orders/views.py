@@ -451,7 +451,7 @@ def export_orders_csv(request):
         [
             "Fecha",
             "Comanda",
-            "Mesero",
+            "Servicio",
             "Mesa",
             "Cantidad",
             "Producto",

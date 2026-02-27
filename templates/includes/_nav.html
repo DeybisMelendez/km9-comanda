@@ -1,4 +1,4 @@
-{% load user_extras %}
+{% load user_tags %}
 <header class="nav" x-data="{ mobileMenuOpen: false }">
     <div class="nav__container">
         <a href="{% url 'table_list' %}" class="nav__brand">Boa POS</a>
@@ -45,10 +45,10 @@
                     <li class="nav__item nav__dropdown">
                         <a href="#" class="nav__link">Inventario</a>
                         <div class="nav__dropdown-content">
-                             <a href="{% url 'inventory_movement' %}" class="nav__dropdown-link">Registrar Movimientos</a>
-                             <a href="{% url 'purchase_ingredients' %}" class="nav__dropdown-link">Ingresos de Inventario</a>
-                             <a href="{% url 'report_inventory' %}" class="nav__dropdown-link">Saldo Actual</a>
-                             <a href="{% url 'ingredient_list' %}" class="nav__dropdown-link">Ingredientes</a>
+                            <a href="{% url 'inventory_movement' %}" class="nav__dropdown-link">Registrar Movimientos</a>
+                            <a href="{% url 'purchase_ingredients' %}" class="nav__dropdown-link">Ingresos de Inventario</a>
+                            <a href="{% url 'report_inventory' %}" class="nav__dropdown-link">Saldo Actual</a>
+                            <a href="{% url 'ingredient_list' %}" class="nav__dropdown-link">Ingredientes</a>
                         </div>
                     </li>
                     <!-- Reportes -->

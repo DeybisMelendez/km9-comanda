@@ -6,6 +6,8 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group, User
 
+from users.permissions import ALL_GROUPS
+
 
 class UserCreateForm(UserCreationForm):
     """Formulario para crear un nuevo usuario."""
@@ -23,7 +25,7 @@ class UserCreateForm(UserCreationForm):
         widget=forms.TextInput(attrs={"placeholder": "Apellido"}),
     )
     groups = forms.ModelChoiceField(
-        queryset=Group.objects.filter(name__in=["Mesero", "Encargado", "Admin"]),
+        queryset=Group.objects.filter(name__in=ALL_GROUPS),
         required=True,
         label="Rol",
         help_text="Seleccione el rol del usuario",
@@ -68,7 +70,7 @@ class UserEditForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30, required=True, label="Nombre")
     last_name = forms.CharField(max_length=30, required=True, label="Apellido")
     groups = forms.ModelChoiceField(
-        queryset=Group.objects.filter(name__in=["Mesero", "Encargado", "Admin"]),
+        queryset=Group.objects.filter(name__in=ALL_GROUPS),
         required=True,
         label="Rol",
     )
@@ -96,9 +98,7 @@ class UserEditForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             # Cargar el grupo actual del usuario (solo el primero)
-            group = self.instance.groups.filter(
-                name__in=["Mesero", "Encargado", "Admin"]
-            ).first()
+            group = self.instance.groups.filter(name__in=ALL_GROUPS).first()
             if group:
                 self.initial["groups"] = group
 

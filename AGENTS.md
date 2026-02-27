@@ -195,7 +195,7 @@ class Ingredient(models.Model):
 ### Templates
 
 - Base template: `templates/layout.html`
-- Use `{% load static %}` and `{% load user_extras %}` as needed.
+- Use `{% load static %}` and `{% load user_tags %}` as needed.
 - Extend blocks `{% block title %}` and `{% block body %}`.
 - Use AlpineJS for simple interactivity; avoid writing complex JavaScript.
 - Keep HTML semantic; use custom BEM‑based CSS (see Frontend Guidelines).
