@@ -1,30 +1,26 @@
 {% extends "layout.html" %}
-{% load static %}
 {% block title %}{{ title }}{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/form.css' %}">
-{% endblock %}
 {% block body %}
-    <div class="main__container">
-        <h1>{{ title }}</h1>
+    <div class="container">
+        <h1 class="mb-4">{{ title }}</h1>
         {% include "includes/_messages.html" %}
         <div class="card">
-            <div class="card__body">
-                <form method="post" class="form">
+            <div class="card-body">
+                <form method="post">
                     {% csrf_token %}
-                    <div class="form__group">
-                        <label for="name" class="form__label">Nombre del Ingrediente *</label>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre del Ingrediente *</label>
                         <input type="text"
                                id="name"
                                name="name"
                                value="{% if ingredient %}{{ ingredient.name }}{% endif %}"
                                required
-                               class="form__control"
+                               class="form-control"
                                placeholder="Ej: Harina de trigo">
                     </div>
-                    <div class="form__group">
-                        <label for="unit" class="form__label">Unidad *</label>
-                        <select id="unit" name="unit" required class="form__control">
+                    <div class="mb-3">
+                        <label for="unit" class="form-label">Unidad *</label>
+                        <select id="unit" name="unit" required class="form-select">
                             <option value="">--- Selecciona una unidad ---</option>
                             {% for unit_code, unit_name in units %}
                                 <option value="{{ unit_code }}"
@@ -34,9 +30,9 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="form__group">
-                        <label for="warehouse" class="form__label">Almacén (opcional)</label>
-                        <select id="warehouse" name="warehouse" class="form__control">
+                    <div class="mb-3">
+                        <label for="warehouse" class="form-label">Almacén (opcional)</label>
+                        <select id="warehouse" name="warehouse" class="form-select">
                             <option value="">--- Sin almacén ---</option>
                             {% for warehouse in warehouses %}
                                 <option value="{{ warehouse.id }}"
@@ -46,9 +42,9 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="form__group">
-                        <button type="submit" class="button button--primary"><i class="material-icons">save</i> Guardar Ingrediente</button>
-                        <a href="{% url 'ingredient_list' %}" class="button button--secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary"><i class="material-icons">save</i> Guardar Ingrediente</button>
+                        <a href="{% url 'ingredient_list' %}" class="btn btn-secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
                     </div>
                 </form>
             </div>

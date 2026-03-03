@@ -1,81 +1,81 @@
 {% extends "layout.html" %}
-{% load static %}
 {% block title %}Editar Comanda #{{ order.id }}{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
-{% endblock %}
 {% block body %}
-    <div class="card" x-data="{ modal: false }">
-        <div class="card__header">
-            <h1 class="card__title">Editar Comanda #{{ order.id }}</h1>
-        </div>
-        <div class="card__body">
-            <form method="post" class="form">
-                {% csrf_token %}
-                <div class="form__group">
-                    <label for="table" class="form__label">Mesa</label>
-                    <select name="table" id="table" class="form__control form__select" required>
-                        <option value="">-- Seleccionar Mesa --</option>
-                        {% for table in tables %}
-                            <option value="{{ table.id }}"
-                                    {% if order.table and order.table.id == table.id %}selected{% endif %}>
-                                Mesa {{ table.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form__group">
-                    <label for="user" class="form__label">Mesero</label>
-                    <select name="user" id="user" class="form__control form__select" required>
-                        <option value="">-- Seleccionar Mesero --</option>
-                        {% for user in users %}
-                            <option value="{{ user.id }}"
-                                    {% if order.user and order.user.id == user.id %}selected{% endif %}>
-                                {{ user.username }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form__group">
-                    <label class="form__checkbox">
+    <div class="container">
+        <div class="card" x-data="{ modal: false }">
+            <div class="card-header">
+                <h1 class="h4 mb-0">Editar Comanda #{{ order.id }}</h1>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="table" class="form-label">Mesa</label>
+                        <select name="table" id="table" class="form-select" required>
+                            <option value="">-- Seleccionar Mesa --</option>
+                            {% for table in tables %}
+                                <option value="{{ table.id }}"
+                                        {% if order.table and order.table.id == table.id %}selected{% endif %}>
+                                    Mesa {{ table.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="user" class="form-label">Mesero</label>
+                        <select name="user" id="user" class="form-select" required>
+                            <option value="">-- Seleccionar Mesero --</option>
+                            {% for u in users %}
+                                <option value="{{ u.id }}"
+                                        {% if order.user and order.user.id == u.id %}selected{% endif %}>
+                                    {{ u.username }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
                         <input type="checkbox"
                                name="is_paid"
-                               class="form__checkbox-input"
+                               class="form-check-input"
+                               id="is_paid"
                                {% if order.is_paid %}checked{% endif %}>
-                        <span class="form__checkbox-label">Marcar como pagado</span>
-                    </label>
-                </div>
-                <div class="card__footer">
-                    <div class="button-group">
+                        <label class="form-check-label" for="is_paid">Marcar como pagado</label>
+                    </div>
+                    <div class="d-flex gap-2">
                         <a href="{% url 'order_detail' order.id %}"
-                           class="button button--secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
+                           class="btn btn-secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
                         <button type="button"
-                                @click.prevent="modal=true"
-                                class="button button--primary"><i class="material-icons">save</i> Guardar Cambios</button>
+                                class="btn btn-primary"
+                                @click.prevent="modal=true"><i class="material-icons">save</i> Guardar Cambios</button>
                     </div>
-                </div>
-                <div class="modal"
-                     x-show="modal"
-                     x-cloak
-                     :class="{'modal--open': modal}"
-                     @click.outside="modal = false">
-                    <div class="modal__dialog">
-                        <div class="modal__header">
-                            <h2 class="modal__title">Confirmar cambios</h2>
-                            <button class="modal__close" @click="modal = false">&times;</button>
-                        </div>
-                        <div class="modal__body">
-                            <p>¿Deseas guardar los cambios realizados en esta comanda?</p>
-                        </div>
-                        <div class="modal__footer">
-                            <button type="button" @click="modal = false" class="button button--secondary">Cancelar</button>
-                            <button type="button"
-                                    @click="$el.closest('form').submit()"
-                                    class="button button--primary">Confirmar</button>
+                    <!-- Modal de confirmación -->
+                    <div class="modal fade"
+                         id="confirmModal"
+                         tabindex="-1"
+                         aria-labelledby="confirmModalLabel"
+                         aria-hidden="true"
+                         x-show="modal"
+                         x-cloak>
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="confirmModalLabel">Confirmar cambios</h5>
+                                    <button type="button" class="btn-close" @click="modal = false" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>¿Deseas guardar los cambios realizados en esta comanda?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" @click="modal = false" class="btn btn-secondary">Cancelar</button>
+                                    <button type="button"
+                                            @click="$el.closest('form').submit()"
+                                            class="btn btn-primary">Confirmar</button>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 {% endblock %}

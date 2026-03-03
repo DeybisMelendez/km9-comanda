@@ -1,54 +1,48 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% load static %}
 {% block title %}Reporte de Ventas por Producto{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/table.css' %}">
-    <link rel="stylesheet" href="{% static 'css/grid.css' %}">
-{% endblock %}
 {% block body %}
-    <div>
-        <h1>Reporte de Ventas por Producto</h1>
-        <div class="card">
-            <div class="card__header">
-                <div class="card__actions">
-                    <a href="{% url 'export_sales_by_product_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}"
-                       class="button button--primary button--small"><i class="material-icons">download</i> Descargar CSV</a>
-                </div>
+    <div class="container">
+        <h1 class="mb-4">Reporte de Ventas por Producto</h1>
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Filtros</h5>
+                <a href="{% url 'export_sales_by_product_csv' %}?start={{ start|date:'Y-m-d\\TH:i' }}&end={{ end|date:'Y-m-d\\TH:i' }}"
+                   class="btn btn-primary btn-sm"><i class="material-icons">download</i> Descargar CSV</a>
             </div>
-            <div class="card__body">
-                <form method="get" class="form">
-                    <div class="grid grid--2cols">
-                        <div class="form__group">
-                            <label class="form__label">Desde:</label>
+            <div class="card-body">
+                <form method="get">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Desde:</label>
                             <input type="datetime-local"
                                    name="start"
                                    value="{{ start|date:'Y-m-d\\TH:i' }}"
-                                   class="form__control">
+                                   class="form-control">
                         </div>
-                        <div class="form__group">
-                            <label class="form__label">Hasta:</label>
+                        <div class="col-md-6">
+                            <label class="form-label">Hasta:</label>
                             <input type="datetime-local"
                                    name="end"
                                    value="{{ end|date:'Y-m-d\\TH:i' }}"
-                                   class="form__control">
+                                   class="form-control">
                         </div>
                     </div>
-                    <div class="form__group">
-                        <button type="submit" class="button button--secondary"><i class="material-icons">search</i> Filtrar</button>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-secondary"><i class="material-icons">search</i> Filtrar</button>
                     </div>
                 </form>
             </div>
         </div>
-        <div class="table-responsive">
-            <table class="table table--striped table--responsive">
+        <div class="table-responsive mb-4">
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Area de Despacho</th>
                         <th>Producto</th>
-                        <th class="table__cell--numeric">Precio Unitario</th>
-                        <th class="table__cell--numeric">Cantidad Vendida</th>
-                        <th class="table__cell--numeric">Total</th>
+                        <th class="text-end">Precio Unitario</th>
+                        <th class="text-end">Cantidad Vendida</th>
+                        <th class="text-end">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -56,45 +50,45 @@
                         <tr>
                             <td>{{ i.product__dispatch_area__name }}</td>
                             <td>{{ i.product__name }}</td>
-                            <td class="table__cell--numeric">C$ {{ i.price|floatformat:2|intcomma }}</td>
-                            <td class="table__cell--numeric">{{ i.total_qty|intcomma }}</td>
-                            <td class="table__cell--numeric">C$ {{ i.total_sales|floatformat:2|intcomma }}</td>
+                            <td class="text-end">C$ {{ i.price|floatformat:2|intcomma }}</td>
+                            <td class="text-end">{{ i.total_qty|intcomma }}</td>
+                            <td class="text-end">C$ {{ i.total_sales|floatformat:2|intcomma }}</td>
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="5" class="table__cell--center">Sin ventas registradas</td>
+                            <td colspan="5" class="text-center">Sin ventas registradas</td>
                         </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr>
                         <th colspan="4">Total general</th>
-                        <th class="table__cell--numeric">C$ {{ total_sales|floatformat:2|intcomma }}</th>
+                        <th class="text-end">C$ {{ total_sales|floatformat:2|intcomma }}</th>
                     </tr>
                 </tfoot>
             </table>
         </div>
-        <h3>Totales por área de despacho</h3>
-        <div class="table-responsive">
-            <table class="table table--striped table--responsive">
+        <h3 class="h5 mb-3">Totales por área de despacho</h3>
+        <div class="table-responsive mb-3">
+            <table class="table table-striped">
                 <thead>
                     <tr>
                         <th>Área</th>
-                        <th class="table__cell--numeric">Ventas totales</th>
+                        <th class="text-end">Ventas totales</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for t in totals_by_dispatch_area %}
                         <tr>
                             <td>{{ t.product__dispatch_area__name }}</td>
-                            <td class="table__cell--numeric">C$ {{ t.area_total_sales|floatformat:2|intcomma }}</td>
+                            <td class="text-end">C$ {{ t.area_total_sales|floatformat:2|intcomma }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
         <p>
-            <small>Mostrando ventas pagadas entre {{ start|date:"d/m/Y H:i" }} y {{ end|date:"d/m/Y H:i" }}</small>
+            <small class="text-body-secondary">Mostrando ventas pagadas entre {{ start|date:"d/m/Y H:i" }} y {{ end|date:"d/m/Y H:i" }}</small>
         </p>
     </div>
 {% endblock %}

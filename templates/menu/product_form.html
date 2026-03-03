@@ -1,30 +1,26 @@
 {% extends "layout.html" %}
-{% load static %}
 {% block title %}{{ title }}{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/form.css' %}">
-{% endblock %}
 {% block body %}
-    <div class="main__container">
-        <h1>{{ title }}</h1>
+    <div class="container">
+        <h1 class="mb-4">{{ title }}</h1>
         {% include "includes/_messages.html" %}
         <div class="card">
-            <div class="card__body">
-                <form method="post" class="form">
+            <div class="card-body">
+                <form method="post">
                     {% csrf_token %}
-                    <div class="form__group">
-                        <label for="name" class="form__label">Nombre del Producto *</label>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nombre del Producto *</label>
                         <input type="text"
                                id="name"
                                name="name"
                                value="{% if product %}{{ product.name }}{% endif %}"
                                required
-                               class="form__control"
+                               class="form-control"
                                placeholder="Ej: Pizza Margarita">
                     </div>
-                    <div class="form__group">
-                        <label for="category" class="form__label">Categoría</label>
-                        <select id="category" name="category" class="form__control">
+                    <div class="mb-3">
+                        <label for="category" class="form-label">Categoría</label>
+                        <select id="category" name="category" class="form-select">
                             <option value="">--- Sin categoría ---</option>
                             {% for cat in categories %}
                                 <option value="{{ cat.id }}"
@@ -34,9 +30,9 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="form__group">
-                        <label for="dispatch_area" class="form__label">Área de Despacho</label>
-                        <select id="dispatch_area" name="dispatch_area" class="form__control">
+                    <div class="mb-3">
+                        <label for="dispatch_area" class="form-label">Área de Despacho</label>
+                        <select id="dispatch_area" name="dispatch_area" class="form-select">
                             <option value="">--- Sin área ---</option>
                             {% for area in dispatch_areas %}
                                 <option value="{{ area.id }}"
@@ -46,8 +42,8 @@
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="form__group">
-                        <label for="price" class="form__label">Precio (C$) *</label>
+                    <div class="mb-3">
+                        <label for="price" class="form-label">Precio (C$) *</label>
                         <input type="number"
                                id="price"
                                name="price"
@@ -55,12 +51,12 @@
                                min="0"
                                value="{% if product %}{{ product.price|floatformat:2 }}{% else %}0.00{% endif %}"
                                required
-                               class="form__control"
+                               class="form-control"
                                placeholder="0.00">
                     </div>
-                    <div class="form__group">
-                        <button type="submit" class="button button--primary"><i class="material-icons">save</i> Guardar Producto</button>
-                        <a href="{% url 'product_list' %}" class="button button--secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary"><i class="material-icons">save</i> Guardar Producto</button>
+                        <a href="{% url 'product_list' %}" class="btn btn-secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
                     </div>
                 </form>
             </div>

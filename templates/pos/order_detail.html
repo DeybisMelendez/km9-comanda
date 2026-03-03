@@ -1,73 +1,71 @@
 {% extends "layout.html" %}
 {% load humanize %}
 {% load user_tags %}
-{% load static %}
 {% block title %}Detalle de Comanda{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/table.css' %}">
-{% endblock %}
 {% block body %}
-    <div class="card">
-        <header class="card__header">
-            <h1 class="card__title">Comanda #{{ order.id }} - Mesa {{ order.table.name }}</h1>
-            <p class="card__subtitle">
-                Fecha de creación: {{ order.created_at|date:"d/m/Y H:i" }}
-                <br>
-                Mesero: {{ order.user }}
-            </p>
-            <div class="card__actions">
-                {% if user|can_mark_paid %}
-                    <a href="{% url 'edit_order' order.id %}" class="button button--primary"><i class="material-icons">edit</i> Editar Comanda</a>
-                {% endif %}
-            </div>
-        </header>
-        <div class="card__body">
-            <div class="table-responsive">
-                <table class="table table--striped table--responsive">
-                    <thead>
-                        <tr>
-                            <th class="table__cell--product">Producto</th>
-                            <th class="table__cell--quantity">Cant.</th>
-                            <th class="table__cell--price">Precio</th>
-                            <th class="table__cell--price">Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in items %}
-                            <tr>
-                                <td>{{ item.product.name }}</td>
-                                <td class="table__cell--numeric">{{ item.quantity|floatformat:2|intcomma }}</td>
-                                <td class="table__cell--numeric">C$ {{ item.product.price|floatformat:2|intcomma }}</td>
-                                <td class="table__cell--numeric">C$ {{ item.get_total|floatformat:2|intcomma }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="3">Total</th>
-                            <th class="table__cell--numeric">C$ {{ total|floatformat:2|intcomma }}</th>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-            <p class="card__text">
-                Estado:
-                <strong>
-                    {% if order.is_paid %}
-                        Pagado
-                    {% else %}
-                        Pendiente
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h1 class="h4 mb-1">Comanda #{{ order.id }} - Mesa {{ order.table.name }}</h1>
+                        <small class="text-body-secondary">
+                            Fecha de creación: {{ order.created_at|date:"d/m/Y H:i" }}
+                            <br>
+                            Mesero: {{ order.user }}
+                        </small>
+                    </div>
+                    {% if user|can_mark_paid %}
+                        <a href="{% url 'edit_order' order.id %}" class="btn btn-primary"><i class="material-icons">edit</i> Editar Comanda</a>
                     {% endif %}
-                </strong>
-            </p>
-        </div>
-        <footer class="card__footer">
-            <div class="card__actions card__actions--right">
-                <div x-data="{ comandaHtml: '', async printOrder() { const response = await fetch('{% url "print_order" order.id %}'); this.comandaHtml = await response.text(); } }">
-                    <iframe :srcdoc="comandaHtml" frameborder="0" style="display: none"></iframe>
-                    <button type="button" class="button button--secondary" @click="printOrder()"><i class="material-icons">print</i> Imprimir Comanda</button>
                 </div>
             </div>
-        </footer>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th class="text-end">Cant.</th>
+                                <th class="text-end">Precio</th>
+                                <th class="text-end">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td class="text-end">{{ item.quantity|floatformat:2|intcomma }}</td>
+                                    <td class="text-end">C$ {{ item.product.price|floatformat:2|intcomma }}</td>
+                                    <td class="text-end">C$ {{ item.get_total|floatformat:2|intcomma }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="3">Total</th>
+                                <th class="text-end">C$ {{ total|floatformat:2|intcomma }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <p class="mb-0">
+                    <strong>Estado:</strong>
+                    {% if order.is_paid %}
+                        <span class="badge bg-success">Pagado</span>
+                    {% else %}
+                        <span class="badge bg-warning">Pendiente</span>
+                    {% endif %}
+                </p>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-end">
+                    <div x-data="{ comandaHtml: '', async printOrder() { const response = await fetch('{% url "print_order" order.id %}'); this.comandaHtml = await response.text(); } }">
+                        <iframe :srcdoc="comandaHtml" frameborder="0" style="display: none"></iframe>
+                        <button type="button" class="btn btn-secondary" @click="printOrder()"><i class="material-icons">print</i> Imprimir Comanda</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

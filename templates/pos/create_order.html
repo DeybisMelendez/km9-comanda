@@ -1,11 +1,6 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% load static %}
 {% block title %}Crear Comanda{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/table.css' %}">
-    <link rel="stylesheet" href="{% static 'css/button-group.css' %}">
-{% endblock %}
 {% block body %}
     <div x-data="{ showCategory: '', products: {
         {% for product in products %}
@@ -13,101 +8,103 @@
             {% if not forloop.last %},{% endif %}
         {% endfor %}
         } }">
-        <article class="card">
-            <h1>Nueva Comanda - Mesa {{ table.name }}</h1>
-            <!-- Categorías -->
-            <h2>Categorías</h2>
-            <div class="button-group">
-                <button type="button" class="button button--outline" @click="showCategory=''">Todas</button>
-                {% for category in categories %}
-                    <button type="button"
-                            class="button button--outline"
-                            @click="showCategory='{{ category.name }}'">{{ category.name }}</button>
-                {% endfor %}
-            </div>
-            <!-- Formulario -->
-            <form method="post">
-                {% csrf_token %}
-                <h2 class="card__subtitle" x-text="showCategory || 'Todos los productos'"></h2>
-                <div class="table-responsive">
-                    <table class="table table--striped">
-                        <thead>
-                            <tr>
-                                <th class="table__cell--product" scope="col">Producto</th>
-                                <th class="table__cell--price" scope="col">Precio</th>
-                                <th class="table__cell--quantity" scope="col">Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for product in products %}
-                                <tr x-show="showCategory==='' || showCategory==='{{ product.category.name }}'">
-                                    <td>{{ product.name }}</td>
-                                    <td>C$ {{ product.price }}</td>
-                                    <td class="table__cell--center">
-                                        <div class="button-group">
-                                            <button type="button"
-                                                    class="button button--outline button--small"
-                                                    @click.prevent="products[{{ product.id }}].qty > 0 ? products[{{ product.id }}].qty-- : ''">
-                                                <i class="material-icons">remove</i>
-                                            </button>
-                                            <input type="number"
-                                                   class="form__control form__control--center"
-                                                   name="product_{{ product.id }}"
-                                                   min="0"
-                                                   x-model.number="products[{{ product.id }}].qty">
-                                            <button type="button"
-                                                    class="button button--outline button--small"
-                                                    @click.prevent="products[{{ product.id }}].qty++"><i class="material-icons">add</i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h1 class="mb-4">Nueva Comanda - Mesa {{ table.name }}</h1>
+                <!-- Categorías -->
+                <h2 class="h5 mb-3">Categorías</h2>
+                <div class="mb-4">
+                    <button type="button" class="btn btn-outline-primary" @click="showCategory=''">Todas</button>
+                    {% for category in categories %}
+                        <button type="button"
+                                class="btn btn-outline-primary"
+                                @click="showCategory='{{ category.name }}'">{{ category.name }}</button>
+                    {% endfor %}
                 </div>
-            </article>
-            <!-- Resumen de productos -->
-            <article class="card card--summary">
-                <header class="card__header">
-                    <h2 class="card__title">Resumen de Productos</h2>
-                </header>
-                <div class="card__body">
+                <!-- Formulario -->
+                <form method="post">
+                    {% csrf_token %}
+                    <h3 class="h6 mb-3" x-text="showCategory || 'Todos los productos'"></h3>
                     <div class="table-responsive">
-                        <table class="table table--summary">
+                        <table class="table table-striped">
                             <thead>
                                 <tr>
                                     <th scope="col">Producto</th>
-                                    <th scope="col">Cantidad</th>
                                     <th scope="col">Precio</th>
-                                    <th scope="col">Monto</th>
+                                    <th scope="col">Cantidad</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <template x-for="(product, id) in products" :key="id">
-                                    <tr x-show="product.qty > 0">
-                                        <td x-text="`${product.name}`"></td>
-                                        <td x-text="`${product.qty}`"></td>
-                                        <td x-text="`C$ ${product.price}`"></td>
-                                        <td x-text="`C$ ${product.qty * product.price}`"></td>
+                                {% for product in products %}
+                                    <tr x-show="showCategory==='' || showCategory==='{{ product.category.name }}'">
+                                        <td>{{ product.name }}</td>
+                                        <td>C$ {{ product.price }}</td>
+                                        <td class="text-center">
+                                            <div class="btn-group" role="group">
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary btn-sm"
+                                                        @click.prevent="products[{{ product.id }}].qty > 0 ? products[{{ product.id }}].qty-- : ''">
+                                                    <i class="material-icons">remove</i>
+                                                </button>
+                                                <input type="number"
+                                                       class="form-control text-center"
+                                                       style="width: 80px;"
+                                                       name="product_{{ product.id }}"
+                                                       min="0"
+                                                       x-model.number="products[{{ product.id }}].qty">
+                                                <button type="button"
+                                                        class="btn btn-outline-secondary btn-sm"
+                                                        @click.prevent="products[{{ product.id }}].qty++"><i class="material-icons">add</i>
+                                                </button>
+                                            </div>
+                                        </td>
                                     </tr>
-                                </template>
+                                {% endfor %}
                             </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td colspan="3">Total:</td>
-                                    <td>
-                                        C$ <span x-text="Object.values(products).reduce((sum, p) => sum + p.qty * p.price, 0)"></span>
-                                    </td>
-                                </tr>
-                            </tfoot>
                         </table>
                     </div>
-                </div>
-            </article>
-            <div class="button-group button-group--right">
-                <button type="submit" class="button button--primary">Crear Comanda</button>
+                </form>
             </div>
+        </div>
+        <!-- Resumen de productos -->
+        <div class="card border-warning mb-4">
+            <div class="card-header bg-warning bg-opacity-25">
+                <h5 class="mb-0">Resumen de Productos</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Producto</th>
+                                <th scope="col">Cantidad</th>
+                                <th scope="col">Precio</th>
+                                <th scope="col">Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="(product, id) in products" :key="id">
+                                <tr x-show="product.qty > 0">
+                                    <td x-text="`${product.name}`"></td>
+                                    <td x-text="`${product.qty}`"></td>
+                                    <td x-text="`C$ ${product.price}`"></td>
+                                    <td x-text="`C$ ${product.qty * product.price}`"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3"><strong>Total:</strong></td>
+                                <td><strong>C$ <span x-text="Object.values(products).reduce((sum, p) => sum + p.qty * p.price, 0)"></span></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-end gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">Crear Comanda</button>
+        </div>
         </form>
         {% if order %}
             <div x-data="{ comandaHtml: '', async init() { const response = await fetch('{% url "print_order" order.id %}'); this.comandaHtml = await response.text(); console.log(this.comandaHtml); } }">

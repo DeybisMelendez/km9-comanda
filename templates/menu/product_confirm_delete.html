@@ -1,21 +1,18 @@
 {% extends "layout.html" %}
-{% load static %}
 {% block title %}Eliminar Producto{% endblock %}
 {% block body %}
-    <div class="main__container">
-        <h1><i class="material-icons">delete</i> Eliminar Producto</h1>
+    <div class="container">
+        <h1 class="mb-4"><i class="material-icons">delete</i> Eliminar Producto</h1>
         {% include "includes/_messages.html" %}
         <div class="card">
-            <div class="card__body">
-                <p>
-                    ¿Está seguro que desea eliminar el producto <strong>"{{ product.name }}"</strong>?
-                </p>
+            <div class="card-body">
+                <p>¿Está seguro que desea eliminar el producto <strong>"{{ product.name }}"</strong>?</p>
                 <p>Esta acción no se puede deshacer.</p>
-                <form method="post" class="form">
+                <form method="post">
                     {% csrf_token %}
-                    <div class="form__group">
-                        <button type="submit" class="button button--danger"><i class="material-icons">delete</i> Sí, eliminar producto</button>
-                        <a href="{% url 'product_list' %}" class="button button--secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-danger"><i class="material-icons">delete</i> Sí, eliminar producto</button>
+                        <a href="{% url 'product_list' %}" class="btn btn-secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
                     </div>
                 </form>
             </div>

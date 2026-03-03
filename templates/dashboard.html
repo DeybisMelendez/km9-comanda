@@ -1,53 +1,10 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% load static %}
 {% block title %}Dashboard - Resumen General{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/grid.css' %}">
-    <link rel="stylesheet" href="{% static 'css/card.css' %}">
-    <style>
-        .dashboard__kpi {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            border-radius: 8px;
-            background: var(--card-background);
-            box-shadow: var(--card-shadow);
-            text-align: center;
-        }
-        .dashboard__kpi-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--primary);
-            line-height: 1;
-        }
-        .dashboard__kpi-label {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 0.5rem;
-        }
-        .dashboard__kpi--warning .dashboard__kpi-value {
-            color: var(--warning);
-        }
-        .dashboard__kpi--danger .dashboard__kpi-value {
-            color: var(--danger);
-        }
-        .dashboard__kpi--success .dashboard__kpi-value {
-            color: var(--success);
-        }
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
-        }
-    </style>
-{% endblock %}
 {% block body %}
-    <div>
-        <h1><i class="material-icons">dashboard</i> Dashboard - Resumen General</h1>
-        <p class="text-secondary">
+    <div class="container">
+        <h1 class="mb-1"><i class="material-icons">dashboard</i> Dashboard - Resumen General</h1>
+        <p class="text-body-secondary mb-4">
             Resumen visual adaptado a tu rol:
             {% if is_admin %}
                 Administrador
@@ -62,72 +19,92 @@
             {% endif %}
         </p>
         <!-- KPIs -->
-        <div class="grid grid--3cols">
+        <div class="row row-cols-1 row-cols-md-3 g-4 mb-4">
             {% if sales_today %}
-                <div class="dashboard__kpi dashboard__kpi--success">
-                    <div class="dashboard__kpi-value">C$ {{ sales_today|floatformat:2|intcomma }}</div>
-                    <div class="dashboard__kpi-label">Ventas Hoy</div>
+                <div class="col">
+                    <div class="card text-center h-100 border-success">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <div class="h1 text-success mb-2">C$ {{ sales_today|floatformat:2|intcomma }}</div>
+                            <h5 class="card-title text-body-secondary">Ventas Hoy</h5>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
             {% if pending_orders %}
-                <div class="dashboard__kpi dashboard__kpi--warning">
-                    <div class="dashboard__kpi-value">{{ pending_orders }}</div>
-                    <div class="dashboard__kpi-label">Órdenes Pendientes</div>
+                <div class="col">
+                    <div class="card text-center h-100 border-warning">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <div class="h1 text-warning mb-2">{{ pending_orders }}</div>
+                            <h5 class="card-title text-body-secondary">Órdenes Pendientes</h5>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
             {% if low_stock_count %}
-                <div class="dashboard__kpi dashboard__kpi--danger">
-                    <div class="dashboard__kpi-value">{{ low_stock_count }}</div>
-                    <div class="dashboard__kpi-label">Ingredientes con Stock Bajo</div>
+                <div class="col">
+                    <div class="card text-center h-100 border-danger">
+                        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <div class="h1 text-danger mb-2">{{ low_stock_count }}</div>
+                            <h5 class="card-title text-body-secondary">Ingredientes con Stock Bajo</h5>
+                        </div>
+                    </div>
                 </div>
             {% endif %}
         </div>
         <!-- Gráficos -->
-        <div class="grid grid--2cols">
+        <div class="row g-4 mb-4">
             {% if sales_labels %}
-                <div class="card">
-                    <div class="card__header">
-                        <h3>Ventas Últimos 7 Días</h3>
-                    </div>
-                    <div class="card__body">
-                        <div class="chart-container">
-                            <canvas id="salesChart"></canvas>
+                <div class="col-12 col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Ventas Últimos 7 Días</h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="position: relative; height: 300px;">
+                                <canvas id="salesChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endif %}
             {% if area_labels %}
-                <div class="card">
-                    <div class="card__header">
-                        <h3>Ventas por Área de Despacho (Hoy)</h3>
-                    </div>
-                    <div class="card__body">
-                        <div class="chart-container">
-                            <canvas id="areaChart"></canvas>
+                <div class="col-12 col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Ventas por Área de Despacho (Hoy)</h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="position: relative; height: 300px;">
+                                <canvas id="areaChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endif %}
             {% if stock_labels %}
-                <div class="card">
-                    <div class="card__header">
-                        <h3>Ingredientes con Stock Bajo</h3>
-                    </div>
-                    <div class="card__body">
-                        <div class="chart-container">
-                            <canvas id="stockChart"></canvas>
+                <div class="col-12 col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Ingredientes con Stock Bajo</h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="position: relative; height: 300px;">
+                                <canvas id="stockChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
             {% endif %}
             {% if orders_labels %}
-                <div class="card">
-                    <div class="card__header">
-                        <h3>Órdenes Pendientes por Mesa</h3>
-                    </div>
-                    <div class="card__body">
-                        <div class="chart-container">
-                            <canvas id="ordersChart"></canvas>
+                <div class="col-12 col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0">Órdenes Pendientes por Mesa</h5>
+                        </div>
+                        <div class="card-body">
+                            <div style="position: relative; height: 300px;">
+                                <canvas id="ordersChart"></canvas>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -136,8 +113,8 @@
         <!-- Mensaje si no hay gráficos -->
         {% if not sales_labels and not area_labels and not stock_labels and not orders_labels %}
             <div class="card">
-                <div class="card__body">
-                    <p class="text-center">No hay datos disponibles para mostrar en el dashboard con tu rol actual.</p>
+                <div class="card-body text-center">
+                    <p class="mb-0">No hay datos disponibles para mostrar en el dashboard con tu rol actual.</p>
                 </div>
             </div>
         {% endif %}

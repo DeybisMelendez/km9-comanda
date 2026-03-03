@@ -1,15 +1,26 @@
-<section class="messages"
+<section class="py-3"
          x-data="{ showAlerts: true }"
          x-show="showAlerts"
          x-transition>
-    <div class="messages__container">
+    <div class="container">
         {% for message in messages %}
-            <div class="message message--{{ message.tags }} message--dismissible">
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show d-flex align-items-center" role="alert">
+                {% if message.tags == 'success' %}
+                    <i class="material-icons me-2">check_circle</i>
+                {% elif message.tags == 'error' %}
+                    <i class="material-icons me-2">error</i>
+                {% elif message.tags == 'warning' %}
+                    <i class="material-icons me-2">warning</i>
+                {% elif message.tags == 'info' %}
+                    <i class="material-icons me-2">info</i>
+                {% else %}
+                    <i class="material-icons me-2">campaign</i>
+                {% endif %}
                 {{ message }}
                 <button type="button"
-                        class="message__close"
+                        class="btn-close"
                         @click="showAlerts = false"
-                        aria-label="Cerrar">&times;</button>
+                        aria-label="Cerrar"></button>
             </div>
         {% endfor %}
     </div>

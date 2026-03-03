@@ -1,31 +1,28 @@
 {% extends "layout.html" %}
-{% load static %}
 {% block title %}Eliminar Categoría{% endblock %}
 {% block body %}
-    <div class="main__container">
-        <h1><i class="material-icons">delete</i> Eliminar Categoría</h1>
+    <div class="container">
+        <h1 class="mb-4"><i class="material-icons">delete</i> Eliminar Categoría</h1>
         {% include "includes/_messages.html" %}
         <div class="card">
-            <div class="card__body">
+            <div class="card-body">
                 {% if products_using_category > 0 %}
-                    <div class="messages messages--warning">
-                        <p>
+                    <div class="alert alert-warning">
+                        <p class="mb-1">
                             <strong><i class="material-icons">warning</i> Advertencia:</strong> Esta categoría está siendo usada por <strong>{{ products_using_category }}</strong> producto(s).
                         </p>
-                        <p>Si eliminas esta categoría, los productos que la usan quedarán sin categoría asignada.</p>
-                        <p>¿Deseas continuar con la eliminación?</p>
+                        <p class="mb-0">Si eliminas esta categoría, los productos que la usan quedarán sin categoría asignada.</p>
+                        <p class="mb-0">¿Deseas continuar con la eliminación?</p>
                     </div>
                 {% else %}
-                    <p>
-                        ¿Está seguro que desea eliminar la categoría <strong>"{{ category.name }}"</strong>?
-                    </p>
+                    <p>¿Está seguro que desea eliminar la categoría <strong>"{{ category.name }}"</strong>?</p>
                     <p>Esta acción no se puede deshacer.</p>
                 {% endif %}
-                <form method="post" class="form">
+                <form method="post">
                     {% csrf_token %}
-                    <div class="form__group">
-                        <button type="submit" class="button button--danger"><i class="material-icons">delete</i> Sí, eliminar categoría</button>
-                        <a href="{% url 'category_list' %}" class="button button--secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-danger"><i class="material-icons">delete</i> Sí, eliminar categoría</button>
+                        <a href="{% url 'category_list' %}" class="btn btn-secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
                     </div>
                 </form>
             </div>

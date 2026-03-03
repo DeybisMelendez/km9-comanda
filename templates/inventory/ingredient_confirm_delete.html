@@ -1,33 +1,30 @@
 {% extends "layout.html" %}
-{% load static %}
 {% block title %}Eliminar Ingrediente{% endblock %}
 {% block body %}
-    <div class="main__container">
-        <h1><i class="material-icons">delete</i> Eliminar Ingrediente</h1>
+    <div class="container">
+        <h1 class="mb-4"><i class="material-icons">delete</i> Eliminar Ingrediente</h1>
         {% include "includes/_messages.html" %}
         <div class="card">
-            <div class="card__body">
-                <p>
-                    ¿Está seguro que desea eliminar el ingrediente <strong>"{{ ingredient.name }}"</strong>?
-                </p>
+            <div class="card-body">
+                <p>¿Está seguro que desea eliminar el ingrediente <strong>"{{ ingredient.name }}"</strong>?</p>
                 {% if movements_count > 0 or recipes_count > 0 %}
-                    <div class="alert alert--warning">
-                        <p>
+                    <div class="alert alert-warning">
+                        <p class="mb-1">
                             <strong><i class="material-icons">warning</i> Advertencia:</strong> Este ingrediente tiene registros asociados:
                         </p>
-                        <ul>
+                        <ul class="mb-1">
                             {% if movements_count > 0 %}<li>{{ movements_count }} movimiento(s) de inventario.</li>{% endif %}
                             {% if recipes_count > 0 %}<li>{{ recipes_count }} receta(s) de producto(s).</li>{% endif %}
                         </ul>
-                        <p>Si elimina este ingrediente, esos registros también se eliminarán (movimientos y recetas).</p>
+                        <p class="mb-0">Si elimina este ingrediente, esos registros también se eliminarán (movimientos y recetas).</p>
                     </div>
                 {% endif %}
                 <p>Esta acción no se puede deshacer.</p>
-                <form method="post" class="form">
+                <form method="post">
                     {% csrf_token %}
-                    <div class="form__group">
-                        <button type="submit" class="button button--danger"><i class="material-icons">delete</i> Sí, eliminar ingrediente</button>
-                        <a href="{% url 'ingredient_list' %}" class="button button--secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-danger"><i class="material-icons">delete</i> Sí, eliminar ingrediente</button>
+                        <a href="{% url 'ingredient_list' %}" class="btn btn-secondary"><i class="material-icons">arrow_back</i> Cancelar</a>
                     </div>
                 </form>
             </div>

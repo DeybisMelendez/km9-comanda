@@ -1,41 +1,40 @@
 {% extends "layout.html" %}
 {% load humanize %}
-{% load static %}
 {% block title %}Mesas{% endblock %}
-{% block extra_css %}
-    <link rel="stylesheet" href="{% static 'css/grid.css' %}">
-    <link rel="stylesheet" href="{% static 'css/modal.css' %}">
-{% endblock %}
 {% block body %}
-    <div class="main__container"
-         x-data="{modal: false, tableName:'', tableTotal:'', tableId:''}"
-         x-init="console.log('AlpineJS initialized', modal)"
-         x-effect="console.log('modal changed:', modal)">
-        <h1>Mesas</h1>
-        <div class="grid">
+    <div class="container">
+        <h1 class="mb-4">Mesas</h1>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
             {% for item in table_data %}
-                <div class="grid__item">
-                    <div class="card">
-                        <div class="card__header">
-                            <h3 class="card__title">Mesa {{ item.table.name }}</h3>
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="material-icons text-primary">table_restaurant</i> Mesa {{ item.table.name }}</h5>
                         </div>
-                        <div class="card__body">
-                            <p class="card__text">
+                        <div class="card-body">
+                            <p class="card-text">
                                 Total pendiente: <strong>C$ {{ item.total_due|floatformat:2|intcomma }}</strong>
                             </p>
                         </div>
-                        <div class="card__footer card__footer--centered">
-                            <div class="card__actions card__actions--equal">
+                        <div class="card-footer text-center">
+                            <div class="btn-group" role="group">
                                 <a href="{% url 'create_order' item.table.id %}"
-                                   class="button button--primary"
+                                   class="btn btn-primary"
                                    title="Crear nueva orden"><i class="material-icons">add</i></a>
                                 <a href="{% url 'table_orders' item.table.id %}"
-                                   class="button button--secondary"
+                                   class="btn btn-secondary"
                                    title="Ver órdenes de la mesa"><i class="material-icons">list_alt</i></a>
                                 {% if item.total_due > 0 %}
-                                    <button @click="console.log('Pagar clicked'); tableName='{{ item.table.name|escapejs }}'; tableTotal='{{ item.total_due|floatformat:2|intcomma|escapejs }}'; tableId='{{ item.table.id|escapejs }}'; modal=true; console.log('modal:', modal)"
-                                            class="button button--success"
-                                            title="Marcar como pagado"><i class="material-icons">check_circle</i></button>
+                                    <button type="button"
+                                            class="btn btn-success"
+                                            title="Marcar como pagado"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#paymentModal"
+                                            data-table-id="{{ item.table.id }}"
+                                            data-table-name="{{ item.table.name }}"
+                                            data-table-total="{{ item.total_due|floatformat:2|intcomma }}">
+                                        <i class="material-icons">check_circle</i>
+                                    </button>
                                 {% endif %}
                             </div>
                         </div>
@@ -43,32 +42,49 @@
                 </div>
             {% endfor %}
         </div>
-        <!-- Modal de confirmación de pago -->
-        <div class="modal"
-             x-show="modal"
-             x-cloak
-             :class="{'modal--open': modal}"
-             @click.outside="modal = false">
-            <div class="modal__dialog">
-                <div class="modal__header">
-                    <h3 class="modal__title">
-                        Pagar mesa <span x-text="tableName"></span>
-                    </h3>
-                    <button class="modal__close" @click="modal = false">&times;</button>
+    </div>
+
+    <!-- Modal de confirmación de pago -->
+    <div class="modal fade"
+         id="paymentModal"
+         tabindex="-1"
+         aria-labelledby="paymentModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paymentModalLabel">
+                        Pagar mesa <span id="modalTableName"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal__body">
-                    <p>
-                        ¿Desea marcar como pagado la mesa <strong><span x-text="tableName"></span></strong>?
-                    </p>
-                    <p class="modal__text">
-                        <strong>Total a pagar: C$ <span x-text="tableTotal"></span></strong>
-                    </p>
+                <div class="modal-body">
+                    <p>¿Desea marcar como pagado la mesa <strong><span id="modalTableName2"></span></strong>?</p>
+                    <p><strong>Total a pagar: C$ <span id="modalTableTotal"></span></strong></p>
                 </div>
-                <div class="modal__footer">
-                    <button class="button button--secondary" @click="modal = false">Cancelar</button>
-                    <a :href="'/mesa/'+ tableId + '/pagar/'" class="button button--primary">Confirmar pago</a>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <a id="confirmPaymentBtn" href="#" class="btn btn-primary">Confirmar pago</a>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentModal = document.getElementById('paymentModal');
+            
+            paymentModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const tableId = button.getAttribute('data-table-id');
+                const tableName = button.getAttribute('data-table-name');
+                const tableTotal = button.getAttribute('data-table-total');
+                
+                document.getElementById('modalTableName').textContent = tableName;
+                document.getElementById('modalTableName2').textContent = tableName;
+                document.getElementById('modalTableTotal').textContent = tableTotal;
+                document.getElementById('confirmPaymentBtn').href = '/mesa/' + tableId + '/pagar/';
+            });
+        });
+    </script>
 {% endblock %}

@@ -1,118 +1,123 @@
 {% load static %}
 {% load user_tags %}
 <!-- Info bar: usuario y fecha/hora -->
-<div class="nav__info-bar" x-data="datetimeUpdater">
-    <div class="nav__container">
-        <div class="nav__user-info">
-            <i class="material-icons">person</i>
+<div class="border-bottom bg-body" x-data="datetimeUpdater">
+    <div class="container d-flex justify-content-between align-items-center py-1">
+        <div class="d-flex align-items-center gap-2">
+            <i class="material-icons text-primary">person</i>
             <strong>{{ user|get_group }}:</strong> {{ request.user }}
         </div>
-        <div class="nav__datetime">
+        <div class="d-flex align-items-center gap-1 font-monospace">
             <span x-text="time"></span>
-            <span class="nav__datetime-sep">|</span>
+            <span class="text-body-tertiary">|</span>
             <span x-text="date"></span>
         </div>
     </div>
 </div>
-<header class="nav" x-data="mobileMenu">
-    <div class="nav__container">
-        <a href="{% url 'dashboard' %}" class="nav__brand">
-            <i class="material-icons nav__brand-icon">restaurant</i>
+<nav class="navbar navbar-expand-lg bg-body sticky-top border-bottom" x-data="mobileMenu">
+    <div class="container">
+        <a href="{% url 'dashboard' %}" class="navbar-brand fw-bold text-primary">
+            <i class="material-icons">restaurant</i>
             <span>Boa POS</span>
         </a>
-        <button class="nav__toggle"
-                @click="mobileMenuOpen = !mobileMenuOpen"
+        <button class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainNav"
+                aria-controls="mainNav"
+                aria-expanded="false"
                 aria-label="Toggle menu">
-            <svg class="nav__toggle-icon"
-                 viewBox="0 0 24 24"
-                 width="24"
-                 height="24"
-                 fill="none"
-                 stroke="currentColor"
-                 stroke-width="2">
-                <path d="M3 12h18M3 6h18M3 18h18" />
-            </svg>
+            <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="nav__menus"
-             x-bind:class="{ 'nav__menus--open': mobileMenuOpen }">
-            <ul class="nav__menu">
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <!-- POS: Mesas + Historial -->
-                <li class="nav__item nav__dropdown">
-                    <a href="#" class="nav__link"><i class="material-icons">restaurant</i> POS</a>
-                    <div class="nav__dropdown-content">
-                        <a href="{% url 'table_list' %}" class="nav__dropdown-link"><i class="material-icons">table_restaurant</i> Mesas</a>
-                        <a href="{% url 'order_history' %}" class="nav__dropdown-link"><i class="material-icons">history</i> Historial</a>
-                    </div>
+                <li class="nav-item dropdown">
+                    <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="material-icons">restaurant</i> POS
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'table_list' %}" class="dropdown-item"><i class="material-icons">table_restaurant</i> Mesas</a></li>
+                        <li><a href="{% url 'order_history' %}" class="dropdown-item"><i class="material-icons">history</i> Historial</a></li>
+                    </ul>
                 </li>
                 <!-- Gestión del Menú -->
                 {% if user|can_manage_menu %}
-                    <li class="nav__item nav__dropdown">
-                        <a href="#" class="nav__link"><i class="material-icons">menu_book</i> Menú</a>
-                        <div class="nav__dropdown-content">
-                            <a href="{% url 'product_list' %}" class="nav__dropdown-link">Productos</a>
-                            <a href="{% url 'category_list' %}" class="nav__dropdown-link">Categorías</a>
-                            <a href="{% url 'dispatch_area_list' %}" class="nav__dropdown-link">Áreas</a>
-                            <a href="{% url 'company_settings' %}" class="nav__dropdown-link">Configuración</a>
-                        </div>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="material-icons">menu_book</i> Menú
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'product_list' %}" class="dropdown-item">Productos</a></li>
+                            <li><a href="{% url 'category_list' %}" class="dropdown-item">Categorías</a></li>
+                            <li><a href="{% url 'dispatch_area_list' %}" class="dropdown-item">Áreas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a href="{% url 'company_settings' %}" class="dropdown-item">Configuración</a></li>
+                        </ul>
                     </li>
                 {% endif %}
                 <!-- Inventario -->
                 {% if user|can_view_inventory %}
-                    <li class="nav__item nav__dropdown">
-                        <a href="#" class="nav__link"><i class="material-icons">inventory</i> Inventario</a>
-                        <div class="nav__dropdown-content">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="material-icons">inventory</i> Inventario
+                        </a>
+                        <ul class="dropdown-menu">
                             {% if user|can_add_inventory_movement %}
-                                <a href="{% url 'inventory_movement' %}" class="nav__dropdown-link">Movimientos</a>
-                                <a href="{% url 'purchase_ingredients' %}" class="nav__dropdown-link">Ingresos</a>
+                                <li><a href="{% url 'inventory_movement' %}" class="dropdown-item">Movimientos</a></li>
+                                <li><a href="{% url 'purchase_ingredients' %}" class="dropdown-item">Ingresos</a></li>
                             {% endif %}
                             {% if user|can_view_inventory %}
-                                <a href="{% url 'report_inventory' %}" class="nav__dropdown-link">Saldo</a>
-                                <a href="{% url 'ingredient_list' %}" class="nav__dropdown-link">Ingredientes</a>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a href="{% url 'report_inventory' %}" class="dropdown-item">Saldo</a></li>
+                                <li><a href="{% url 'ingredient_list' %}" class="dropdown-item">Ingredientes</a></li>
                             {% endif %}
-                        </div>
+                        </ul>
                     </li>
                 {% endif %}
                 <!-- Reportes -->
                 {% if user|can_view_reports %}
-                    <li class="nav__item nav__dropdown">
-                        <a href="#" class="nav__link"><i class="material-icons">assessment</i> Reportes</a>
-                        <div class="nav__dropdown-content">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="material-icons">assessment</i> Reportes
+                        </a>
+                        <ul class="dropdown-menu">
                             {% if user|can_view_sales_report %}
-                                <a href="{% url 'sales_report_by_product' %}" class="nav__dropdown-link">Ventas</a>
+                                <li><a href="{% url 'sales_report_by_product' %}" class="dropdown-item">Ventas</a></li>
                             {% endif %}
                             {% if user|can_view_order_history %}
-                                <a href="{% url 'report_orders' %}" class="nav__dropdown-link">Comandas</a>
+                                <li><a href="{% url 'report_orders' %}" class="dropdown-item">Comandas</a></li>
                             {% endif %}
                             {% if user|can_view_inventory %}
-                                <a href="{% url 'report_movements' %}" class="nav__dropdown-link">Movimientos</a>
+                                <li><a href="{% url 'report_movements' %}" class="dropdown-item">Movimientos</a></li>
                             {% endif %}
-                        </div>
+                        </ul>
                     </li>
                 {% endif %}
                 {% if user|can_manage_users %}
-                    <li class="nav__item nav__dropdown">
-                        <a href="#" class="nav__link"><i class="material-icons">admin_panel_settings</i> Admin</a>
-                        <div class="nav__dropdown-content">
-                            <a href="{% url 'user_list' %}" class="nav__dropdown-link">Usuarios</a>
-                            {% if user.is_superuser %}<a href="/admin/" class="nav__dropdown-link" target="_blank">Panel Admin</a>{% endif %}
-                        </div>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="material-icons">admin_panel_settings</i> Admin
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a href="{% url 'user_list' %}" class="dropdown-item">Usuarios</a></li>
+                            {% if user.is_superuser %}
+                            <li><a href="/admin/" class="dropdown-item" target="_blank">Panel Admin</a></li>
+                            {% endif %}
+                        </ul>
                     </li>
                 {% endif %}
             </ul>
-            <ul class="nav__menu">
-                <li class="nav__item">
-                    <form method="post" action="{% url 'logout' %}" class="nav__form">
-                        {% csrf_token %}
-                        <button type="submit" class="button button--small button--danger">
-                            <i class="material-icons">logout</i>
-                            <span>Salir</span>
-                        </button>
-                    </form>
-                </li>
-            </ul>
+            <form method="post" action="{% url 'logout' %}" class="d-flex">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                    <i class="material-icons">logout</i>
+                    <span>Salir</span>
+                </button>
+            </form>
         </div>
     </div>
-</header>
+</nav>
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('datetimeUpdater', () => ({
@@ -127,10 +132,6 @@
                 this.update();
                 setInterval(() => this.update(), 1000);
             }
-        }));
-
-        Alpine.data('mobileMenu', () => ({
-            mobileMenuOpen: false
         }));
     });
 </script>
